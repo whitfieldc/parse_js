@@ -1,38 +1,12 @@
-= RKelly
-
-* http://rkelly.rubyforge.org/
+= RKelly Remix
 
 == DESCRIPTION
 
-The RKelly library will parse JavaScript and return a parse tree.
+Fork of the RKelly library to make it suitable as the JavaScript parser
+in JSDuck.
 
-== Example
+* http://rkelly.rubyforge.org/
 
-  ##
-  # Iterate over and modify a JavaScript AST.  Then print the modified
-  # AST as JavaScript.
-  require 'rkelly'
-
-  parser = RKelly::Parser.new
-  ast    = parser.parse(
-    "for(var i = 0; i < 10; i++) { var x = 5 + 5; }"
-  )
-  
-  ast.each do |node|
-    node.value  = 'hello' if node.value == 'i'
-    node.name   = 'hello' if node.respond_to?(:name) && node.name == 'i'
-  end
-  puts ast.to_ecma # => awesome javascript
-
-== Acknowledgments
-
-The original javascript parser was was taken from rbnarcissus written by
-Paul Sowden.  Thanks Paul!
-
-  http://idontsmoke.co.uk/2005/rbnarcissus/
-
-The current parser was ported from WebKit.  Thank you WebKit team!
-  
 == License
 
 The MIT License
