@@ -64,6 +64,17 @@ module RKelly
       '}' => true,
     }
 
+    # Determine the method to use to measure String length in bytes,
+    # because StringScanner#pos can obly be set in bytes.
+    #
+    # - In Ruby 1.8 String#length returns always the string length
+    #   in bytes.
+    #
+    # - In Ruby 1.9+ String#length returns string length in
+    #   characters and we need to use String#bytesize instead.
+    #
+    BYTESIZE_METHOD = "".respond_to?(:bytesize) ? :bytesize : :length
+
     def initialize(&block)
       @lexemes = Hash.new {|hash, key| hash[key] = [] }
 
@@ -148,7 +159,7 @@ module RKelly
           accepting_regexp = followable_by_regex(token)
         end
 
-        scanner.pos += token.value.length
+        scanner.pos += token.value.send(BYTESIZE_METHOD)
         token.range = range = range.next(token.value)
         tokens << token
       end
