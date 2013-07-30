@@ -1,5 +1,9 @@
 = RKelly-Remix CHANGELOG
 
+=== 0.0.4
+
+* Allow use of keywords in property names.
+
 === 0.0.3
 
 * Add RKelly::Parser#stopped_at method for error reporting.
