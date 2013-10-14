@@ -12,11 +12,15 @@ module RKelly
       const true false null debugger
     }.map {|kw| [kw, kw.upcase.to_sym] }]
 
+    # First 6 are always reserved in ECMAScript 5.1
+    # Others are only reserved in strict mode.
+    # http://www.ecma-international.org/ecma-262/5.1/#sec-7.6.1.2
+    # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Reserved_Words
     RESERVED = Hash[%w{
-      abstract boolean byte char class double enum export extends
-      final float goto implements import int interface long native package
-      private protected public short static super synchronized throws
-      transient volatile
+      class enum export extends import super
+
+      implements interface package private protected public static
+      let yield
     }.map {|kw| [kw, true] }]
 
     LITERALS = {
