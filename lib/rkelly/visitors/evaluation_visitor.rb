@@ -192,6 +192,10 @@ module RKelly
         o.value.accept(self)
       end
 
+      def visit_EmptyStatementNode(o)
+        # do nothing
+      end
+
       def visit_FunctionBodyNode(o)
         o.value.accept(self)
         scope_chain.return
@@ -278,7 +282,7 @@ module RKelly
         BitXOrNode BracketAccessorNode BreakNode
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
         ConstStatementNode ContinueNode DeleteNode
-        DoWhileNode ElementNode EmptyStatementNode
+        DoWhileNode ElementNode
         ForInNode ForNode
         FunctionExprNode GetterPropertyNode GreaterNode GreaterOrEqualNode
         InNode InstanceOfNode LabelNode LeftShiftNode LessNode
