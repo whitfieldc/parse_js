@@ -36,6 +36,12 @@ module RKelly
         end
       end
 
+      def visit_WhileNode(o)
+        while to_boolean(o.left.accept(self)).value
+          o.value.accept(self)
+        end
+      end
+
       def visit_ResolveNode(o)
         scope_chain[o.value]
       end
@@ -312,7 +318,7 @@ module RKelly
         SetterPropertyNode StrictEqualNode
         SwitchNode ThrowNode TryNode
         UnsignedRightShiftNode
-        WhileNode WithNode
+        WithNode
       }.each do |type|
         define_method(:"visit_#{type}") do |o|
           raise "#{type} not defined"
