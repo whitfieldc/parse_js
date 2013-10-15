@@ -1,7 +1,14 @@
+require 'rkelly/js'
+
 module RKelly
   module Visitors
     class EvaluationVisitor < Visitor
+
+      # Shorthand for the value object creator
+      VALUE = RKelly::JS::Value
+
       attr_reader :scope_chain
+
       def initialize(scope)
         super()
         @scope_chain = scope
@@ -31,25 +38,23 @@ module RKelly
 
       ## 11.1.3 Literal Reference
       def visit_NullNode(o)
-        RKelly::JS::Property.new(nil, nil)
+        VALUE[nil]
       end
 
       def visit_TrueNode(o)
-        RKelly::JS::Property.new(true, true)
+        VALUE[true]
       end
 
       def visit_FalseNode(o)
-        RKelly::JS::Property.new(false, false)
+        VALUE[false]
       end
 
       def visit_StringNode(o)
-        RKelly::JS::Property.new(:string,
-          o.value.gsub(/\A['"]/, '').gsub(/['"]$/, '')
-        )
+        VALUE[o.value.gsub(/\A['"]/, '').gsub(/['"]$/, '')]
       end
 
       def visit_NumberNode(o)
-        RKelly::JS::Property.new(o.value, o.value)
+        VALUE[o.value]
       end
 
       ## 11.2 Left-Hand-Side Expressions
@@ -98,27 +103,27 @@ module RKelly
       ## 11.4.2 The 'void' Operator
       def visit_VoidNode(o)
         o.value.accept(self)
-        RKelly::JS::Property.new(:undefined, :undefined)
+        VALUE[:undefined]
       end
 
       ## 11.4.3 The 'typeof' Operator
       def visit_TypeOfNode(o)
         val = o.value.accept(self)
-        return RKelly::JS::Property.new(:string, 'object') if val.value.nil?
+        return VALUE['object'] if val.value.nil?
 
         case val.value
         when String
-          RKelly::JS::Property.new(:string, 'string')
+          VALUE['string']
         when Numeric
-          RKelly::JS::Property.new(:string, 'number')
+          VALUE['number']
         when true
-          RKelly::JS::Property.new(:string, 'boolean')
+          VALUE['boolean']
         when false
-          RKelly::JS::Property.new(:string, 'boolean')
+          VALUE['boolean']
         when :undefined
-          RKelly::JS::Property.new(:string, 'undefined')
+          VALUE['undefined']
         else
-          RKelly::JS::Property.new(:object, 'object')
+          VALUE['object']
         end
       end
 
@@ -154,7 +159,7 @@ module RKelly
       def visit_BitwiseNotNode(o)
         orig = o.value.accept(self)
         number = to_int_32(orig)
-        RKelly::JS::Property.new(nil, ~number.value)
+        VALUE[~number.value]
       end
 
       ## 11.4.9 Logical NOT Operator (!)
@@ -179,7 +184,7 @@ module RKelly
               left * right
             end
           end
-        RKelly::JS::Property.new(:multiple, return_val)
+        VALUE[return_val]
       end
 
       def visit_DivideNode(o)
@@ -197,7 +202,7 @@ module RKelly
           else
             left / right
           end
-        RKelly::JS::Property.new(:divide, return_val)
+        VALUE[return_val]
       end
 
       def visit_ModulusNode(o)
@@ -217,7 +222,7 @@ module RKelly
           else
             left % right
           end
-        RKelly::JS::Property.new(:divide, return_val)
+        VALUE[return_val]
       end
 
       ## 11.6 Additive Operators
@@ -227,18 +232,14 @@ module RKelly
         right = to_primitive(o.value.accept(self), 'Number')
 
         if left.value.is_a?(::String) || right.value.is_a?(::String)
-          RKelly::JS::Property.new(:add,
-            "#{left.value}#{right.value}"
-          )
+          VALUE["#{left.value}#{right.value}"]
         else
           additive_operator(:+, left, right)
         end
       end
 
       def visit_SubtractNode(o)
-        RKelly::JS::Property.new(:subtract,
-          o.left.accept(self).value - o.value.accept(self).value
-        )
+        VALUE[o.left.accept(self).value - o.value.accept(self).value]
       end
 
       ## 11.8 Relational Operators
@@ -265,7 +266,7 @@ module RKelly
         left = o.left.accept(self)
         right = o.value.accept(self)
 
-        RKelly::JS::Property.new(:equal_node, left.value == right.value)
+        VALUE[left.value == right.value]
       end
 
       ## 11.13 Assignment Operators
@@ -349,7 +350,7 @@ module RKelly
       end
 
       def visit_FunctionExprNode(o)
-        RKelly::JS::Property.new(nil, RKelly::JS::Function.new(o.function_body, o.arguments))
+        VALUE[RKelly::JS::Function.new(o.function_body, o.arguments)]
       end
 
       def visit_FunctionBodyNode(o)
@@ -385,7 +386,7 @@ module RKelly
 
       private
       def to_number(object)
-        return RKelly::JS::Property.new('0', 0) unless object.value
+        return VALUE[0] unless object.value
 
         return_val =
           case object.value
@@ -419,11 +420,11 @@ module RKelly
           when RKelly::JS::Base
             return to_number(to_primitive(object, 'Number'))
           end
-        RKelly::JS::Property.new(nil, return_val)
+        VALUE[return_val]
       end
 
       def to_boolean(object)
-        return RKelly::JS::Property.new(false, false) unless object.value
+        return VALUE[false] unless object.value
         value = object.value
         boolean =
           case value
@@ -440,7 +441,7 @@ module RKelly
           else
             raise
           end
-        RKelly::JS::Property.new(boolean, boolean)
+        VALUE[boolean]
       end
 
       def to_int_32(object)
@@ -448,13 +449,13 @@ module RKelly
         value = number.value
         return number if value == 0
         if nan?(value) || infinite?(value)
-          RKelly::JS::Property.new(nil, 0)
+          VALUE[0]
         end
         value = ((value < 0 ? -1 : 1) * value.abs.floor) % (2 ** 32)
         if value >= 2 ** 31
-          RKelly::JS::Property.new(nil, value - (2 ** 32))
+          VALUE[value - (2 ** 32)]
         else
-          RKelly::JS::Property.new(nil, value)
+          VALUE[value]
         end
       end
 
@@ -462,7 +463,7 @@ module RKelly
         return object unless object.value
         case object.value
         when false, true, :undefined, ::String, Numeric
-          RKelly::JS::Property.new(nil, object.value)
+          VALUE[object.value]
         when RKelly::JS::Base
           call_function(object.value.default_value(preferred_type))
         end
@@ -477,7 +478,7 @@ module RKelly
         result = left.send(operator, right)
         result = nan?(result) ? JS::NaN.new : result
 
-        RKelly::JS::Property.new(operator, result)
+        VALUE[result]
       end
 
       def call_function(property, arguments = [])
@@ -488,13 +489,9 @@ module RKelly
             function.js_call(chain, *arguments)
           }
         when UnboundMethod
-          RKelly::JS::Property.new(:ruby,
-            function.bind(property.binder).call(*(arguments.map { |x| x.value}))
-          )
+          VALUE[function.bind(property.binder).call(*(arguments.map { |x| x.value}))]
         else
-          RKelly::JS::Property.new(:ruby,
-            function.call(*(arguments.map { |x| x.value }))
-          )
+          VALUE[function.call(*(arguments.map { |x| x.value }))]
         end
       end
 
@@ -508,15 +505,15 @@ module RKelly
         right = to_primitive(o.value.accept(self), "Number")
 
         if [left, right].all? {|x| x.value.is_a?(::String) }
-          RKelly::JS::Property.new(:relational_node, yield(left.value, right.value))
+          VALUE[yield(left.value, right.value)]
         else
           left = to_number(left).value
           right = to_number(right).value
 
           if nan?(left) || nan?(right)
-            RKelly::JS::Property.new(:relational_node, false)
+            VALUE[false]
           else
-            RKelly::JS::Property.new(:relational_node, yield(left, right))
+            VALUE[yield(left, right)]
           end
         end
       end
