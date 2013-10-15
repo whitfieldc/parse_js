@@ -42,6 +42,12 @@ module RKelly
         end
       end
 
+      def visit_DoWhileNode(o)
+        begin
+          o.left.accept(self)
+        end while to_boolean(o.value.accept(self)).value
+      end
+
       def visit_ResolveNode(o)
         scope_chain[o.value]
       end
@@ -304,7 +310,7 @@ module RKelly
         BitXOrNode BracketAccessorNode BreakNode
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
         ConstStatementNode ContinueNode DeleteNode
-        DoWhileNode ElementNode
+        ElementNode
         ForInNode ForNode
         FunctionExprNode GetterPropertyNode
         InNode InstanceOfNode LabelNode LeftShiftNode
