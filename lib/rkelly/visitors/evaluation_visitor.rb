@@ -83,13 +83,14 @@ module RKelly
         left = to_number(o.left.accept(self)).value
         right = to_number(o.value.accept(self)).value
         return_val =
-          if [left, right].any? { |x| x.respond_to?(:nan?) && x.nan? }
+          if nan?(left) || nan?(right)
             RKelly::JS::NaN.new
           else
-            [left, right].any? { |x|
-              x.respond_to?(:intinite?) && x.infinite?
-            } && [left, right].any? { |x| x == 0
-            } ? RKelly::JS::NaN.new : left * right
+            if (infinite?(left) || infinite?(right)) && (left == 0 || right == 0)
+              RKelly::JS::NaN.new
+            else
+              left * right
+            end
           end
         RKelly::JS::Property.new(:multiple, return_val)
       end
@@ -98,12 +99,11 @@ module RKelly
         left = to_number(o.left.accept(self)).value
         right = to_number(o.value.accept(self)).value
         return_val =
-          if [left, right].any? { |x|
-            x.respond_to?(:nan?) && x.nan? ||
-            x.respond_to?(:intinite?) && x.infinite?
-          }
+          if nan?(left) || nan?(right)
             RKelly::JS::NaN.new
-          elsif [left, right].all? { |x| x == 0 }
+          elsif infinite?(left) && infinite?(right)
+            RKelly::JS::NaN.new
+          elsif left == 0 && right == 0
             RKelly::JS::NaN.new
           elsif right == 0
             left * (right.eql?(0) ? (1.0/0.0) : (-1.0/0.0))
@@ -117,15 +117,15 @@ module RKelly
         left = to_number(o.left.accept(self)).value
         right = to_number(o.value.accept(self)).value
         return_val =
-          if [left, right].any? { |x| x.respond_to?(:nan?) && x.nan? }
+          if nan?(left) || nan?(right)
             RKelly::JS::NaN.new
-          elsif [left, right].all? { |x| x.respond_to?(:infinite?) && x.infinite? }
+          elsif infinite?(left) && infinite?(right)
             RKelly::JS::NaN.new
           elsif right == 0
             RKelly::JS::NaN.new
-          elsif left.respond_to?(:infinite?) && left.infinite?
+          elsif infinite?(left)
             RKelly::JS::NaN.new
-          elsif right.respond_to?(:infinite?) && right.infinite?
+          elsif infinite?(right)
             left
           else
             left % right
@@ -380,7 +380,7 @@ module RKelly
           when true
             true
           when Numeric
-            value == 0 || value.respond_to?(:nan?) && value.nan? ? false : true
+            value == 0 || nan?(value) ? false : true
           when ::String
             value.length == 0 ? false : true
           when RKelly::JS::Base
@@ -395,7 +395,7 @@ module RKelly
         number = to_number(object)
         value = number.value
         return number if value == 0
-        if value.respond_to?(:nan?) && (value.nan? || value.infinite?)
+        if nan?(value) || infinite?(value)
           RKelly::JS::Property.new(nil, 0)
         end
         value = ((value < 0 ? -1 : 1) * value.abs.floor) % (2 ** 32)
@@ -419,11 +419,11 @@ module RKelly
       def additive_operator(operator, left, right)
         left, right = to_number(left).value, to_number(right).value
 
-        left = left.respond_to?(:nan?) && left.nan? ? 0.0/0.0 : left
-        right = right.respond_to?(:nan?) && right.nan? ? 0.0/0.0 : right
+        left = nan?(left) ? 0.0/0.0 : left
+        right = nan?(right) ? 0.0/0.0 : right
 
         result = left.send(operator, right)
-        result = result.respond_to?(:nan?) && result.nan? ? JS::NaN.new : result
+        result = nan?(result) ? JS::NaN.new : result
 
         RKelly::JS::Property.new(operator, result)
       end
@@ -461,12 +461,22 @@ module RKelly
           left = to_number(left).value
           right = to_number(right).value
 
-          if [left, right].any? { |x| x.respond_to?(:nan?) && x.nan? }
+          if nan?(left) || nan?(right)
             RKelly::JS::Property.new(:relational_node, false)
           else
             RKelly::JS::Property.new(:relational_node, yield(left, right))
           end
         end
+      end
+
+      # Helper to check if x is NaN.
+      def nan?(x)
+        x.respond_to?(:nan?) && x.nan?
+      end
+
+      # Helper to check if x is +/-infinity.
+      def infinite?(x)
+        x.respond_to?(:infinite?) && x.infinite?
       end
 
     end
