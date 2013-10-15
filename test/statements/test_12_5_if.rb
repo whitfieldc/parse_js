@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Statement_12_5_1_Test < ExecuteTestCase
+class Statement_12_5_If_Test < ExecuteTestCase
   def setup
     @runtime = RKelly::Runtime.new
   end
