@@ -15,69 +15,156 @@ module RKelly
         }
       end
 
-      def visit_FunctionDeclNode(o)
-      end
+      ## 11 Expressions
 
-      def visit_VarStatementNode(o)
-        o.value.each { |x| x.accept(self) }
-      end
+      ## 11.1 Primary Expressions
 
-      def visit_VarDeclNode(o)
-        @operand << o.name
-        o.value.accept(self) if o.value
-        @operand.pop
-      end
-
-      def visit_IfNode(o)
-        if to_boolean(o.conditions.accept(self)).value
-          o.value.accept(self)
-        elsif o.else
-          o.else.accept(self)
-        end
-      end
-
-      def visit_WhileNode(o)
-        while to_boolean(o.left.accept(self)).value
-          o.value.accept(self)
-        end
-      end
-
-      def visit_DoWhileNode(o)
-        begin
-          o.left.accept(self)
-        end while to_boolean(o.value.accept(self)).value
-      end
-
-      def visit_ResolveNode(o)
-        scope_chain[o.value]
-      end
-
+      ## 11.1.1 The 'this' Reference
       def visit_ThisNode(o)
         scope_chain.this
       end
 
-      def visit_ExpressionStatementNode(o)
-        o.value.accept(self)
+      ## 11.1.2 Identifier Reference
+      def visit_ResolveNode(o)
+        scope_chain[o.value]
       end
 
-      def visit_AddNode(o)
-        left  = to_primitive(o.left.accept(self), 'Number')
-        right = to_primitive(o.value.accept(self), 'Number')
+      ## 11.1.3 Literal Reference
+      def visit_NullNode(o)
+        RKelly::JS::Property.new(nil, nil)
+      end
 
-        if left.value.is_a?(::String) || right.value.is_a?(::String)
-          RKelly::JS::Property.new(:add,
-            "#{left.value}#{right.value}"
-          )
+      def visit_TrueNode(o)
+        RKelly::JS::Property.new(true, true)
+      end
+
+      def visit_FalseNode(o)
+        RKelly::JS::Property.new(false, false)
+      end
+
+      def visit_StringNode(o)
+        RKelly::JS::Property.new(:string,
+          o.value.gsub(/\A['"]/, '').gsub(/['"]$/, '')
+        )
+      end
+
+      def visit_NumberNode(o)
+        RKelly::JS::Property.new(o.value, o.value)
+      end
+
+      ## 11.2 Left-Hand-Side Expressions
+
+      ## 11.2.1 Property Accessors
+      def visit_DotAccessorNode(o)
+        left = o.value.accept(self)
+        right = left.value[o.accessor]
+        right.binder = left.value
+        right
+      end
+
+      ## 11.2.2 The 'new' Operator
+      def visit_NewExprNode(o)
+        visit_FunctionCallNode(o)
+      end
+
+      ## 11.2.3 Function Calls
+      def visit_FunctionCallNode(o)
+        left      = o.value.accept(self)
+        arguments = o.arguments.accept(self)
+        call_function(left, arguments)
+      end
+
+      ## 11.2.4 Argument Lists
+      def visit_ArgumentsNode(o)
+        o.value.map { |x| x.accept(self) }
+      end
+
+      ## 11.3 Postfix Expressions
+
+      def visit_PostfixNode(o)
+        orig = o.operand.accept(self)
+        number = to_number(orig)
+        case o.value
+        when '++'
+          orig.value = number.value + 1
+        when '--'
+          orig.value = number.value - 1
+        end
+        number
+      end
+
+      ## 11.4 Unary Operators
+
+      ## 11.4.2 The 'void' Operator
+      def visit_VoidNode(o)
+        o.value.accept(self)
+        RKelly::JS::Property.new(:undefined, :undefined)
+      end
+
+      ## 11.4.3 The 'typeof' Operator
+      def visit_TypeOfNode(o)
+        val = o.value.accept(self)
+        return RKelly::JS::Property.new(:string, 'object') if val.value.nil?
+
+        case val.value
+        when String
+          RKelly::JS::Property.new(:string, 'string')
+        when Numeric
+          RKelly::JS::Property.new(:string, 'number')
+        when true
+          RKelly::JS::Property.new(:string, 'boolean')
+        when false
+          RKelly::JS::Property.new(:string, 'boolean')
+        when :undefined
+          RKelly::JS::Property.new(:string, 'undefined')
         else
-          additive_operator(:+, left, right)
+          RKelly::JS::Property.new(:object, 'object')
         end
       end
 
-      def visit_SubtractNode(o)
-        RKelly::JS::Property.new(:subtract,
-          o.left.accept(self).value - o.value.accept(self).value
-        )
+      ## 11.4.4 Prefix Increment Operator
+      ## 11.4.5 Prefix Decrement Operator
+      def visit_PrefixNode(o)
+        orig = o.operand.accept(self)
+        number = to_number(orig)
+        case o.value
+        when '++'
+          orig.value = number.value + 1
+        when '--'
+          orig.value = number.value - 1
+        end
+        orig
       end
+
+      ## 11.4.6 Unary + Operator
+      def visit_UnaryPlusNode(o)
+        orig = o.value.accept(self)
+        to_number(orig)
+      end
+
+      ## 11.4.7 Unary - Operator
+      def visit_UnaryMinusNode(o)
+        orig = o.value.accept(self)
+        v = to_number(orig)
+        v.value = v.value == 0 ? -0.0 : 0 - v.value
+        v
+      end
+
+      ## 11.4.8 Binary NOT Operator (~)
+      def visit_BitwiseNotNode(o)
+        orig = o.value.accept(self)
+        number = to_int_32(orig)
+        RKelly::JS::Property.new(nil, ~number.value)
+      end
+
+      ## 11.4.9 Logical NOT Operator (!)
+      def visit_LogicalNotNode(o)
+        bool = to_boolean(o.value.accept(self))
+        bool.value = !bool.value
+        bool
+      end
+
+      ## 11.5 Multiplicative Operators
 
       def visit_MultiplyNode(o)
         left = to_number(o.left.accept(self)).value
@@ -133,72 +220,28 @@ module RKelly
         RKelly::JS::Property.new(:divide, return_val)
       end
 
-      def visit_OpEqualNode(o)
-        left = o.left.accept(self)
-        right = o.value.accept(self)
-        left.value = right.value
-        left.function = right.function
-        left
+      ## 11.6 Additive Operators
+
+      def visit_AddNode(o)
+        left  = to_primitive(o.left.accept(self), 'Number')
+        right = to_primitive(o.value.accept(self), 'Number')
+
+        if left.value.is_a?(::String) || right.value.is_a?(::String)
+          RKelly::JS::Property.new(:add,
+            "#{left.value}#{right.value}"
+          )
+        else
+          additive_operator(:+, left, right)
+        end
       end
 
-      def visit_OpPlusEqualNode(o)
-        o.left.accept(self).value += o.value.accept(self).value
-      end
-
-      def visit_AssignExprNode(o)
-        scope_chain[@operand.last] = o.value.accept(self)
-      end
-
-      def visit_NumberNode(o)
-        RKelly::JS::Property.new(o.value, o.value)
-      end
-
-      def visit_VoidNode(o)
-        o.value.accept(self)
-        RKelly::JS::Property.new(:undefined, :undefined)
-      end
-
-      def visit_NullNode(o)
-        RKelly::JS::Property.new(nil, nil)
-      end
-
-      def visit_TrueNode(o)
-        RKelly::JS::Property.new(true, true)
-      end
-
-      def visit_FalseNode(o)
-        RKelly::JS::Property.new(false, false)
-      end
-
-      def visit_StringNode(o)
-        RKelly::JS::Property.new(:string,
-          o.value.gsub(/\A['"]/, '').gsub(/['"]$/, '')
+      def visit_SubtractNode(o)
+        RKelly::JS::Property.new(:subtract,
+          o.left.accept(self).value - o.value.accept(self).value
         )
       end
 
-      def visit_FunctionCallNode(o)
-        left      = o.value.accept(self)
-        arguments = o.arguments.accept(self)
-        call_function(left, arguments)
-      end
-
-      def visit_NewExprNode(o)
-        visit_FunctionCallNode(o)
-      end
-
-      def visit_DotAccessorNode(o)
-        left = o.value.accept(self)
-        right = left.value[o.accessor]
-        right.binder = left.value
-        right
-      end
-
-      def visit_EqualNode(o)
-        left = o.left.accept(self)
-        right = o.value.accept(self)
-
-        RKelly::JS::Property.new(:equal_node, left.value == right.value)
-      end
+      ## 11.8 Relational Operators
 
       def visit_LessNode(o)
         relational_comparison(o) {|x, y| x < y }
@@ -216,12 +259,93 @@ module RKelly
         relational_comparison(o) {|x, y| x >= y }
       end
 
+      ## 11.9 Equality Operators
+
+      def visit_EqualNode(o)
+        left = o.left.accept(self)
+        right = o.value.accept(self)
+
+        RKelly::JS::Property.new(:equal_node, left.value == right.value)
+      end
+
+      ## 11.13 Assignment Operators
+
+      def visit_AssignExprNode(o)
+        scope_chain[@operand.last] = o.value.accept(self)
+      end
+
+      def visit_OpEqualNode(o)
+        left = o.left.accept(self)
+        right = o.value.accept(self)
+        left.value = right.value
+        left.function = right.function
+        left
+      end
+
+      def visit_OpPlusEqualNode(o)
+        o.left.accept(self).value += o.value.accept(self).value
+      end
+
+
+      ## 12 Statements
+
+      ## 12.1 Block
       def visit_BlockNode(o)
         o.value.accept(self)
       end
 
+      ## 12.2 Variable Statement
+      def visit_VarStatementNode(o)
+        o.value.each { |x| x.accept(self) }
+      end
+
+      def visit_VarDeclNode(o)
+        @operand << o.name
+        o.value.accept(self) if o.value
+        @operand.pop
+      end
+
+      ## 12.3 Empty Statement
       def visit_EmptyStatementNode(o)
         # do nothing
+      end
+
+      ## 12.4 Expression Statement
+      def visit_ExpressionStatementNode(o)
+        o.value.accept(self)
+      end
+
+      ## 12.5 If Statement
+      def visit_IfNode(o)
+        if to_boolean(o.conditions.accept(self)).value
+          o.value.accept(self)
+        elsif o.else
+          o.else.accept(self)
+        end
+      end
+
+      ## 12.6 Iteration Statements
+      def visit_DoWhileNode(o)
+        begin
+          o.left.accept(self)
+        end while to_boolean(o.value.accept(self)).value
+      end
+
+      def visit_WhileNode(o)
+        while to_boolean(o.left.accept(self)).value
+          o.value.accept(self)
+        end
+      end
+
+      ## 12.9 The 'return' Statement
+      def visit_ReturnNode(o)
+        scope_chain.return = o.value.accept(self)
+      end
+
+
+      ## 13 Function Definition
+
+      def visit_FunctionDeclNode(o)
       end
 
       def visit_FunctionBodyNode(o)
@@ -229,81 +353,6 @@ module RKelly
         scope_chain.return
       end
 
-      def visit_ReturnNode(o)
-        scope_chain.return = o.value.accept(self)
-      end
-
-      def visit_BitwiseNotNode(o)
-        orig = o.value.accept(self)
-        number = to_int_32(orig)
-        RKelly::JS::Property.new(nil, ~number.value)
-      end
-
-      def visit_PostfixNode(o)
-        orig = o.operand.accept(self)
-        number = to_number(orig)
-        case o.value
-        when '++'
-          orig.value = number.value + 1
-        when '--'
-          orig.value = number.value - 1
-        end
-        number
-      end
-
-      def visit_PrefixNode(o)
-        orig = o.operand.accept(self)
-        number = to_number(orig)
-        case o.value
-        when '++'
-          orig.value = number.value + 1
-        when '--'
-          orig.value = number.value - 1
-        end
-        orig
-      end
-
-      def visit_LogicalNotNode(o)
-        bool = to_boolean(o.value.accept(self))
-        bool.value = !bool.value
-        bool
-      end
-
-      def visit_ArgumentsNode(o)
-        o.value.map { |x| x.accept(self) }
-      end
-
-      def visit_TypeOfNode(o)
-        val = o.value.accept(self)
-        return RKelly::JS::Property.new(:string, 'object') if val.value.nil?
-
-        case val.value
-        when String
-          RKelly::JS::Property.new(:string, 'string')
-        when Numeric
-          RKelly::JS::Property.new(:string, 'number')
-        when true
-          RKelly::JS::Property.new(:string, 'boolean')
-        when false
-          RKelly::JS::Property.new(:string, 'boolean')
-        when :undefined
-          RKelly::JS::Property.new(:string, 'undefined')
-        else
-          RKelly::JS::Property.new(:object, 'object')
-        end
-      end
-
-      def visit_UnaryPlusNode(o)
-        orig = o.value.accept(self)
-        to_number(orig)
-      end
-
-      def visit_UnaryMinusNode(o)
-        orig = o.value.accept(self)
-        v = to_number(orig)
-        v.value = v.value == 0 ? -0.0 : 0 - v.value
-        v
-      end
 
       %w{
         ArrayNode BitAndNode BitOrNode
