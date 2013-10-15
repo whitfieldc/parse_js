@@ -188,6 +188,22 @@ module RKelly
         RKelly::JS::Property.new(:equal_node, left.value == right.value)
       end
 
+      def visit_LessNode(o)
+        relational_comparison(o) {|x, y| x < y }
+      end
+
+      def visit_GreaterNode(o)
+        relational_comparison(o) {|x, y| x > y }
+      end
+
+      def visit_LessOrEqualNode(o)
+        relational_comparison(o) {|x, y| x <= y }
+      end
+
+      def visit_GreaterOrEqualNode(o)
+        relational_comparison(o) {|x, y| x >= y }
+      end
+
       def visit_BlockNode(o)
         o.value.accept(self)
       end
@@ -284,9 +300,9 @@ module RKelly
         ConstStatementNode ContinueNode DeleteNode
         DoWhileNode ElementNode
         ForInNode ForNode
-        FunctionExprNode GetterPropertyNode GreaterNode GreaterOrEqualNode
-        InNode InstanceOfNode LabelNode LeftShiftNode LessNode
-        LessOrEqualNode LogicalAndNode LogicalOrNode
+        FunctionExprNode GetterPropertyNode
+        InNode InstanceOfNode LabelNode LeftShiftNode
+        LogicalAndNode LogicalOrNode
         NotEqualNode NotStrictEqualNode
         ObjectLiteralNode OpAndEqualNode OpDivideEqualNode
         OpLShiftEqualNode OpMinusEqualNode OpModEqualNode
@@ -417,6 +433,30 @@ module RKelly
           )
         end
       end
+
+      # 11.8.5 The Abstract Relational Comparison Algorithm
+      #
+      # Simplified version of the ECMA algorithm, that drops
+      # the LeftFirst flag and uses #yield instead.  It also
+      # incorporates the evaluation of both subexpressions.
+      def relational_comparison(o)
+        left = to_primitive(o.left.accept(self), "Number")
+        right = to_primitive(o.value.accept(self), "Number")
+
+        if [left, right].all? {|x| x.value.is_a?(::String) }
+          RKelly::JS::Property.new(:relational_node, yield(left.value, right.value))
+        else
+          left = to_number(left).value
+          right = to_number(right).value
+
+          if [left, right].any? { |x| x.respond_to?(:nan?) && x.nan? }
+            RKelly::JS::Property.new(:relational_node, false)
+          else
+            RKelly::JS::Property.new(:relational_node, yield(left, right))
+          end
+        end
+      end
+
     end
   end
 end
