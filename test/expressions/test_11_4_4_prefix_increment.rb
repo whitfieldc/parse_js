@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Expressions_11_4_4_Test < ECMAScriptTestCase
+class Expressions_11_4_4_Prefix_Increment_Test < ECMAScriptTestCase
   def test_uninitialized
     @runtime.execute("
                      var MYVAR;

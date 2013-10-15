@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Expressions_11_4_9_Test < ECMAScriptTestCase
+class Expressions_11_4_9_Logical_Not_Test < ECMAScriptTestCase
   def test_not_null
     js_assert_equal("true", "!(null)")
   end

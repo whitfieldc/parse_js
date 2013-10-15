@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Expressions_11_5_1_Test < ECMAScriptTestCase
+class Expressions_11_5_1_Multiply_Test < ECMAScriptTestCase
   def test_nan_times_nan
     js_assert_equal("Number.NaN", "Number.NaN * Number.NaN")
   end

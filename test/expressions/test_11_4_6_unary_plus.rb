@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Expressions_11_4_6_Test < ECMAScriptTestCase
+class Expressions_11_4_6_Unary_Plus_Test < ECMAScriptTestCase
   @@tests = {
     :empty_string   => ["''", 0],
     :space_string   => ["' '", 0],

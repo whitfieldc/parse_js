@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Expressions_11_4_8_Test < ECMAScriptTestCase
+class Expressions_11_4_8_Bitwise_Not_Test < ECMAScriptTestCase
   def test_positive_not
     0.upto(34) do |number|
       js_assert_equal(~to_int_32(2 ** number), "~#{2 ** number}")

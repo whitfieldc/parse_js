@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Expressions_11_3_1_Test < ECMAScriptTestCase
+class Expressions_11_3_1_Postfix_Increment_Test < ECMAScriptTestCase
   def test_uninitialized
     @runtime.execute("var MYVAR; assert_equal(NaN, MYVAR++); assert_equal(NaN, MYVAR);")
   end
