@@ -24,4 +24,19 @@ class Statement_12_5_1_Test < ExecuteTestCase
     assert_execute({ 'x' => 'pass' },
       "var x; if(1) x = 'pass'; else x = 'fail';")
   end
+
+  def test_if_empty_string
+    assert_execute({ 'x' => 'pass' },
+      "var x; if('') x = 'fail'; else x = 'pass';")
+  end
+
+  def test_if_true_without_else
+    assert_execute({ 'x' => 'pass' },
+      "var x; if(true) x = 'pass';")
+  end
+
+  def test_if_false_without_else
+    assert_execute({ 'x' => 'pass' },
+      "var x = 'pass'; if(false) x = 'fail';")
+  end
 end
