@@ -36,4 +36,12 @@ class Expressions_11_2_3_Function_Calls_Test < ExecuteTestCase
       var x = foo();
     EOJS
   end
+
+  def test_calling_anonymous_function
+    assert_execute({ 'x' => 'I have no name' }, <<-EOJS)
+      var x = function() {
+        return 'I have no name';
+      }();
+    EOJS
+  end
 end

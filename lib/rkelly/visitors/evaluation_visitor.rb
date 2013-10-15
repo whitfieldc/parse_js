@@ -348,11 +348,14 @@ module RKelly
       def visit_FunctionDeclNode(o)
       end
 
+      def visit_FunctionExprNode(o)
+        RKelly::JS::Property.new(nil, RKelly::JS::Function.new(o.function_body, o.arguments))
+      end
+
       def visit_FunctionBodyNode(o)
         o.value.accept(self)
         scope_chain.return
       end
-
 
       %w{
         ArrayNode BitAndNode BitOrNode
@@ -361,7 +364,7 @@ module RKelly
         ConstStatementNode ContinueNode DeleteNode
         ElementNode
         ForInNode ForNode
-        FunctionExprNode GetterPropertyNode
+        GetterPropertyNode
         InNode InstanceOfNode LabelNode LeftShiftNode
         LogicalAndNode LogicalOrNode
         NotEqualNode NotStrictEqualNode
