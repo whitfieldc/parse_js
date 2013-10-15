@@ -7,6 +7,9 @@ module RKelly
       # Shorthand for the value object creator
       VALUE = RKelly::JS::Value
 
+      # One shared NaN object
+      NAN = RKelly::JS::NaN.new
+
       attr_reader :scope_chain
 
       def initialize(scope)
@@ -176,10 +179,10 @@ module RKelly
         right = to_number(o.value.accept(self)).value
         return_val =
           if nan?(left) || nan?(right)
-            RKelly::JS::NaN.new
+            NAN
           else
             if (infinite?(left) || infinite?(right)) && (left == 0 || right == 0)
-              RKelly::JS::NaN.new
+              NAN
             else
               left * right
             end
@@ -192,11 +195,11 @@ module RKelly
         right = to_number(o.value.accept(self)).value
         return_val =
           if nan?(left) || nan?(right)
-            RKelly::JS::NaN.new
+            NAN
           elsif infinite?(left) && infinite?(right)
-            RKelly::JS::NaN.new
+            NAN
           elsif left == 0 && right == 0
-            RKelly::JS::NaN.new
+            NAN
           elsif right == 0
             left * (right.eql?(0) ? (1.0/0.0) : (-1.0/0.0))
           else
@@ -210,13 +213,13 @@ module RKelly
         right = to_number(o.value.accept(self)).value
         return_val =
           if nan?(left) || nan?(right)
-            RKelly::JS::NaN.new
+            NAN
           elsif infinite?(left) && infinite?(right)
-            RKelly::JS::NaN.new
+            NAN
           elsif right == 0
-            RKelly::JS::NaN.new
+            NAN
           elsif infinite?(left)
-            RKelly::JS::NaN.new
+            NAN
           elsif infinite?(right)
             left
           else
@@ -391,7 +394,7 @@ module RKelly
         return_val =
           case object.value
           when :undefined
-            RKelly::JS::NaN.new
+            NAN
           when false
             0
           when true
@@ -414,7 +417,7 @@ module RKelly
                 s = s.gsub(/^[0]*/, '') if /^0[1-9]+$/.match(s)
                 eval(s)
               else
-                RKelly::JS::NaN.new
+                NAN
               end
             end
           when RKelly::JS::Base
@@ -476,7 +479,7 @@ module RKelly
         right = nan?(right) ? 0.0/0.0 : right
 
         result = left.send(operator, right)
-        result = nan?(result) ? JS::NaN.new : result
+        result = nan?(result) ? NAN : result
 
         VALUE[result]
       end
