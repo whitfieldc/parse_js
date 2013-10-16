@@ -23,6 +23,15 @@ class Statement_12_9_Return_Test < ExecuteTestCase
     EOJS
   end
 
+  def test_function_without_return
+    assert_execute({ 'x' => :undefined }, <<-EOJS)
+      function foo() {
+          5 + 5;
+      }
+      var x = foo();
+    EOJS
+  end
+
   def test_return_inside_if
     assert_execute({ 'x' => 1 }, <<-EOJS)
       function foo() {

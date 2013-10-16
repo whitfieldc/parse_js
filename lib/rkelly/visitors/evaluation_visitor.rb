@@ -378,7 +378,7 @@ module RKelly
 
       def visit_FunctionBodyNode(o)
         o.value.accept(self)
-        scope_chain.abort_value
+        scope_chain.abort_value || VALUE[:undefined]
       end
 
       %w{
