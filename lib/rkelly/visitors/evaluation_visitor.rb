@@ -20,7 +20,7 @@ module RKelly
 
       def visit_SourceElementsNode(o)
         o.value.each { |x|
-          next if scope_chain.returned?
+          return if scope_chain.returned?
           x.accept(self)
         }
       end
@@ -332,18 +332,18 @@ module RKelly
       def visit_DoWhileNode(o)
         begin
           o.left.accept(self)
-        end while to_boolean(o.value.accept(self)).value
+        end while to_boolean(o.value.accept(self)).value && !scope_chain.returned?
       end
 
       def visit_WhileNode(o)
-        while to_boolean(o.left.accept(self)).value
+        while to_boolean(o.left.accept(self)).value && !scope_chain.returned?
           o.value.accept(self)
         end
       end
 
       ## 12.9 The 'return' Statement
       def visit_ReturnNode(o)
-        scope_chain.return = o.value.accept(self)
+        scope_chain.return = o.value ? o.value.accept(self) : VALUE[:undefined]
       end
 
 
