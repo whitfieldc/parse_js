@@ -43,16 +43,24 @@ module RKelly
         result
       end
 
-      def return=(value)
-        @chain.last.return = value
+      def abort(type, value=nil)
+        @chain.last.abort(type, value)
       end
 
-      def return
-        @chain.last.return
+      def abort_type
+        @chain.last.abort_type
       end
 
-      def returned?
-        @chain.last.returned?
+      def abort_value
+        @chain.last.abort_value
+      end
+
+      def aborted?
+        @chain.last.aborted?
+      end
+
+      def clear_abort
+        @chain.last.clear_abort
       end
     end
   end

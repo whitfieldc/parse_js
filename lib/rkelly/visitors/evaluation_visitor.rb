@@ -20,7 +20,7 @@ module RKelly
 
       def visit_SourceElementsNode(o)
         o.value.each { |x|
-          return if scope_chain.returned?
+          return if scope_chain.aborted?
           x.accept(self)
         }
       end
@@ -332,32 +332,38 @@ module RKelly
       def visit_DoWhileNode(o)
         begin
           o.left.accept(self)
-        end while to_boolean(o.value.accept(self)).value && !scope_chain.returned?
+        end while to_boolean(o.value.accept(self)).value && !scope_chain.aborted?
+
+        clear_break_after_loop
       end
 
       def visit_WhileNode(o)
-        while to_boolean(o.left.accept(self)).value && !scope_chain.returned?
+        while to_boolean(o.left.accept(self)).value && !scope_chain.aborted?
           o.value.accept(self)
         end
+
+        clear_break_after_loop
       end
 
       def visit_ForNode(o)
         o.init.accept(self) if o.init
         while (!o.test || to_boolean(o.test.accept(self)).value)
           o.value.accept(self)
-          return if scope_chain.returned?
+          break if scope_chain.aborted?
           o.counter.accept(self) if o.counter
         end
+
+        clear_break_after_loop
       end
 
       ## 12.8 The 'break' Statement
       def visit_BreakNode(o)
-        scope_chain.break = true
+        scope_chain.abort(:break)
       end
 
       ## 12.9 The 'return' Statement
       def visit_ReturnNode(o)
-        scope_chain.return = o.value ? o.value.accept(self) : VALUE[:undefined]
+        scope_chain.abort(:return, o.value ? o.value.accept(self) : VALUE[:undefined])
       end
 
 
@@ -372,7 +378,7 @@ module RKelly
 
       def visit_FunctionBodyNode(o)
         o.value.accept(self)
-        scope_chain.return
+        scope_chain.abort_value
       end
 
       %w{
@@ -532,6 +538,13 @@ module RKelly
           else
             VALUE[yield(left, right)]
           end
+        end
+      end
+
+      # When loop exited with a break, mark the abortion as handled.
+      def clear_break_after_loop
+        if scope_chain.abort_type == :break
+          scope_chain.clear_abort
         end
       end
 

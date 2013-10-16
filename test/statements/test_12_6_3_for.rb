@@ -31,7 +31,7 @@ class Statement_12_6_3_For_Test < ExecuteTestCase
   def test_for_without_condition
     assert_execute({ 'i' => 10 }, <<-EOJS)
       for (var i=0; ; i++) {
-        if (i == 10) return;
+        if (i == 10) break;
       }
     EOJS
   end
@@ -48,7 +48,7 @@ class Statement_12_6_3_For_Test < ExecuteTestCase
     assert_execute({ 'i' => 10 }, <<-EOJS)
       var i=0;
       for ( ; ; ) {
-        if (i==10) return;
+        if (i==10) break;
         i++;
       }
     EOJS
