@@ -37,6 +37,20 @@ class Expressions_11_2_3_Function_Calls_Test < ExecuteTestCase
     EOJS
   end
 
+  def test_recursion
+    assert_execute({ 'x' => 120 }, <<-EOJS)
+      function factorial(n) {
+        if (n == 1) {
+          return 1;
+        }
+        else {
+          return n * factorial(n-1);
+        }
+      }
+      var x = factorial(5);
+    EOJS
+  end
+
   def test_calling_anonymous_function
     assert_execute({ 'x' => 'I have no name' }, <<-EOJS)
       var x = function() {
