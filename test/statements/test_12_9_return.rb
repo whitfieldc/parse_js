@@ -57,4 +57,15 @@ class Statement_12_9_Return_Test < ExecuteTestCase
     EOJS
   end
 
+  def test_return_inside_infinite_for_loop
+    assert_execute({ 'x' => 5 }, <<-EOJS)
+      function foo() {
+        for (;;) {
+          return 5;
+        }
+      }
+      var x = foo();
+    EOJS
+  end
+
 end

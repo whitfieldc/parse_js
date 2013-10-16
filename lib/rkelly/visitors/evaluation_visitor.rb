@@ -341,6 +341,15 @@ module RKelly
         end
       end
 
+      def visit_ForNode(o)
+        o.init.accept(self) if o.init
+        while (!o.test || to_boolean(o.test.accept(self)).value)
+          o.value.accept(self)
+          return if scope_chain.returned?
+          o.counter.accept(self) if o.counter
+        end
+      end
+
       ## 12.9 The 'return' Statement
       def visit_ReturnNode(o)
         scope_chain.return = o.value ? o.value.accept(self) : VALUE[:undefined]
@@ -367,7 +376,7 @@ module RKelly
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
         ConstStatementNode ContinueNode DeleteNode
         ElementNode
-        ForInNode ForNode
+        ForInNode
         GetterPropertyNode
         InNode InstanceOfNode LabelNode LeftShiftNode
         LogicalAndNode LogicalOrNode
