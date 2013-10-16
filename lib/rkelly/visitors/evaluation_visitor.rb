@@ -332,14 +332,28 @@ module RKelly
       def visit_DoWhileNode(o)
         begin
           o.left.accept(self)
-        end while to_boolean(o.value.accept(self)).value && !scope_chain.aborted?
+
+          if scope_chain.abort_type == :continue
+            scope_chain.clear_abort
+            next
+          elsif scope_chain.aborted?
+            break
+          end
+        end while to_boolean(o.value.accept(self)).value
 
         clear_break_after_loop
       end
 
       def visit_WhileNode(o)
-        while to_boolean(o.left.accept(self)).value && !scope_chain.aborted?
+        while to_boolean(o.left.accept(self)).value
           o.value.accept(self)
+
+          if scope_chain.abort_type == :continue
+            scope_chain.clear_abort
+            next
+          elsif scope_chain.aborted?
+            break
+          end
         end
 
         clear_break_after_loop
@@ -349,11 +363,24 @@ module RKelly
         o.init.accept(self) if o.init
         while (!o.test || to_boolean(o.test.accept(self)).value)
           o.value.accept(self)
-          break if scope_chain.aborted?
+
+          if scope_chain.abort_type == :continue
+            scope_chain.clear_abort
+            o.counter.accept(self) if o.counter
+            next
+          elsif scope_chain.aborted?
+            break
+          end
+
           o.counter.accept(self) if o.counter
         end
 
         clear_break_after_loop
+      end
+
+      ## 12.8 The 'continue' Statement
+      def visit_ContinueNode(o)
+        scope_chain.abort(:continue)
       end
 
       ## 12.8 The 'break' Statement
@@ -385,7 +412,7 @@ module RKelly
         ArrayNode BitAndNode BitOrNode
         BitXOrNode BracketAccessorNode
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
-        ConstStatementNode ContinueNode DeleteNode
+        ConstStatementNode DeleteNode
         ElementNode
         ForInNode
         GetterPropertyNode

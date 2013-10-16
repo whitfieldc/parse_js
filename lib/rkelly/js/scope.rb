@@ -14,6 +14,7 @@ module RKelly
       #
       # - :return   (value is the return value)
       # - :break    (value is the label)
+      # - :continue (value is the label)
       #
       def abort(type, value=nil)
         @aborted = true
