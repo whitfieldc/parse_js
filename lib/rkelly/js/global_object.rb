@@ -1,6 +1,6 @@
 module RKelly
   module JS
-    class GlobalObject < Base
+    class GlobalObject < Scope
       def initialize
         super
         self['class']     = 'GlobalObject'

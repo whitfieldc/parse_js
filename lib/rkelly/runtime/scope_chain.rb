@@ -17,7 +17,7 @@ module RKelly
         }
         scope ? scope[name] : nil
       end
-      
+
       def [](name)
         property = has_property?(name)
         return property if property
@@ -47,7 +47,9 @@ module RKelly
         @chain.last.return = value
       end
 
-      def return; @chain.last.return; end
+      def return
+        @chain.last.return
+      end
 
       def returned?
         @chain.last.returned?

@@ -350,6 +350,11 @@ module RKelly
         end
       end
 
+      ## 12.8 The 'break' Statement
+      def visit_BreakNode(o)
+        scope_chain.break = true
+      end
+
       ## 12.9 The 'return' Statement
       def visit_ReturnNode(o)
         scope_chain.return = o.value ? o.value.accept(self) : VALUE[:undefined]
@@ -372,7 +377,7 @@ module RKelly
 
       %w{
         ArrayNode BitAndNode BitOrNode
-        BitXOrNode BracketAccessorNode BreakNode
+        BitXOrNode BracketAccessorNode
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
         ConstStatementNode ContinueNode DeleteNode
         ElementNode

@@ -1,13 +1,11 @@
 module RKelly
   module JS
     class Base
-      attr_reader :properties, :return, :value
+      attr_reader :properties, :value
       def initialize
         @properties = Hash.new { |h,k|
           h[k] = Property.new(k, :undefined, self)
         }
-        @return     = nil
-        @returned   = false
         @value      = self
         self['Class'] = self.class.to_s.split('::').last
       end
@@ -68,13 +66,6 @@ module RKelly
           end
         end
       end
-
-      def return=(value)
-        @returned = true
-        @return = value
-      end
-
-      def returned?; @returned; end
 
       private
       def unbound_method(name, object_id = nil, &block)
