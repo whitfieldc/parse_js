@@ -9,4 +9,12 @@ class RuntimeTest < Test::Unit::TestCase
     @runtime.execute("function foo(a) { return a + 2; }")
     assert_equal(12, @runtime.call_function("foo", 10))
   end
+
+  def test_define_function
+    @runtime.define_function(:one) do |*args|
+      return 1
+    end
+    @runtime.execute("one();")
+  end
+
 end

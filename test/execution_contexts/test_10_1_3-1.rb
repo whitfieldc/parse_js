@@ -9,24 +9,24 @@ class ExecutionContext_10_1_3_1_Test < Test::Unit::TestCase
   end
 
   def test_myfun3_void_0
-    scope_chain = @runtime.execute("
-                     function myfun3(a, b, a) {
-                      return a;
-                     }
-                     var x = myfun3(2,4);
-                     ")
-    assert scope_chain.has_property?('x')
+    env = @runtime.execute(<<-EOJS)
+        function myfun3(a, b, a) {
+            return a;
+        }
+        var x = myfun3(2,4);
+    EOJS
+    assert env['x']
     #assert_equal :undefined, scope_chain['x'].value
   end
 
   def test_myfun3
-    scope_chain = @runtime.execute("
-                     function myfun3(a, b, a) {
-                      return a;
-                     }
-                     var x = myfun3(2,4,8);
-                     ")
-    assert scope_chain.has_property?('x')
-    assert_equal 8, scope_chain['x'].value
+    env = @runtime.execute(<<-EOJS)
+        function myfun3(a, b, a) {
+            return a;
+        }
+        var x = myfun3(2,4,8);
+    EOJS
+    assert env['x']
+    assert_equal 8, env['x'].value
   end
 end

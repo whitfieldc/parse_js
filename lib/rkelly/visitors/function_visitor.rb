@@ -6,19 +6,17 @@ module RKelly
 
       VALUE = RKelly::JS::Value
 
-      attr_reader :scope_chain
-
-      def initialize(scope)
+      def initialize(environment)
         super()
-        @scope_chain = scope
+        @environment = environment
       end
 
       def visit_VarDeclNode(o)
-        scope_chain[o.name] = VALUE[:undefined]
+        @environment.record[o.name] = VALUE[:undefined]
       end
 
       def visit_FunctionDeclNode(o)
-        scope_chain[o.value] = VALUE[RKelly::JS::Function.new(o.function_body, o.arguments)]
+        @environment.record[o.value] = VALUE[RKelly::JS::Function.new(o.function_body, o.arguments, @environment)]
       end
 
       def visit_FunctionExprNode(o)

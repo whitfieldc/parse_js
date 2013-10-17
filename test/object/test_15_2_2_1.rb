@@ -43,10 +43,10 @@ class Object_15_2_2_1_Test < ECMAScriptTestCase
   end
 
   def js_assert_to_string(expected_type, js_obj)
-    @runtime.execute("
-                     MYOB = new Object(#{js_obj});
-                     MYOB.toString = Object.prototype.toString;
-                     assert_equal('[object #{expected_type}]', MYOB.toString());
-                     ")
+    @runtime.execute(<<-EOJS)
+      var MYOB = new Object(#{js_obj});
+      MYOB.toString = Object.prototype.toString;
+      assert_equal('[object #{expected_type}]', MYOB.toString());
+    EOJS
   end
 end

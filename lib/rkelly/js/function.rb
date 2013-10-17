@@ -16,22 +16,27 @@ module RKelly
       end
 
       attr_reader :body, :arguments
-      def initialize(body = nil, arguments = [])
+      def initialize(body = nil, arguments = [], outer_environment=nil)
         super()
         @body = body
         @arguments = arguments
+        @outer_environment = outer_environment
         self['prototype'] = JS::FunctionPrototype.new(self)
         self['toString'] = :undefined
         self['length'] = arguments.length
       end
 
-      def js_call(scope_chain, *params)
+      def js_call(*params)
+        env = @outer_environment.new_declarative_environment
+
         arguments.each_with_index { |name, i|
-          scope_chain[name.value] = params[i] || RKelly::Runtime::UNDEFINED
+          env.record[name.value] = params[i] || RKelly::Runtime::UNDEFINED
         }
-        function_visitor  = RKelly::Visitors::FunctionVisitor.new(scope_chain)
-        eval_visitor      = RKelly::Visitors::EvaluationVisitor.new(scope_chain)
+
+        function_visitor = RKelly::Visitors::FunctionVisitor.new(env)
         body.accept(function_visitor) if body
+
+        eval_visitor = RKelly::Visitors::EvaluationVisitor.new(env)
         body.accept(eval_visitor) if body
       end
     end

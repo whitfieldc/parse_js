@@ -6,11 +6,10 @@ class ExecuteTestCase < Test::Unit::TestCase
   end
 
   def assert_execute(expected, code)
-    scope_chain = @runtime.execute(code)
+    env = @runtime.execute(code)
     expected.each do |name, value|
-      assert scope_chain.has_property?(name)
-      assert_equal value, scope_chain[name].value
+      assert env[name]
+      assert_equal value, env[name].value
     end
   end
 end
-

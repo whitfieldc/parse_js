@@ -14,11 +14,9 @@ module RKelly
       # One shared NaN object
       NAN = RKelly::JS::NaN.new
 
-      attr_reader :scope_chain
-
-      def initialize(scope)
+      def initialize(environment)
         super()
-        @scope_chain = scope
+        @environment = environment
         @operand = []
       end
 
@@ -28,12 +26,12 @@ module RKelly
 
       ## 11.1.1 The 'this' Reference
       def visit_ThisNode(o)
-        scope_chain.this
+        VALUE[@environment]
       end
 
       ## 11.1.2 Identifier Reference
       def visit_ResolveNode(o)
-        scope_chain[o.value]
+        @environment[o.value]
       end
 
       ## 11.1.3 Literal Reference
@@ -272,7 +270,7 @@ module RKelly
       ## 11.13 Assignment Operators
 
       def visit_AssignExprNode(o)
-        scope_chain[@operand.last] = o.value.accept(self)
+        @environment[@operand.last].value = o.value.accept(self).value
       end
 
       def visit_OpEqualNode(o)
@@ -430,7 +428,7 @@ module RKelly
       end
 
       def visit_FunctionExprNode(o)
-        VALUE[RKelly::JS::Function.new(o.function_body, o.arguments)]
+        VALUE[RKelly::JS::Function.new(o.function_body, o.arguments, @environment)]
       end
 
       def visit_FunctionBodyNode(o)
@@ -569,9 +567,7 @@ module RKelly
         function  = property.function || property.value
         case function
         when RKelly::JS::Function
-          scope_chain.new_scope { |chain|
-            function.js_call(chain, *arguments)
-          }
+          function.js_call(*arguments)
         when UnboundMethod
           VALUE[function.bind(property.binder).call(*(arguments.map { |x| x.value}))]
         else

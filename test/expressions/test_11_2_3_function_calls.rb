@@ -58,4 +58,17 @@ class Expressions_11_2_3_Function_Calls_Test < ExecuteTestCase
       }();
     EOJS
   end
+
+  def test_closure
+    assert_execute({ 'x' => 5 }, <<-EOJS)
+      function makeAdder(a) {
+        return function(b) {
+          return a + b;
+        };
+      }
+      var add2 = makeAdder(2);
+      var x = add2(3);
+    EOJS
+  end
+
 end
