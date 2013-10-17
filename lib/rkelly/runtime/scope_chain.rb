@@ -42,25 +42,6 @@ module RKelly
         result
       end
 
-      def abort(type, value=nil)
-        @current.abort(type, value)
-      end
-
-      def abort_type
-        @current.abort_type
-      end
-
-      def abort_value
-        @current.abort_value
-      end
-
-      def aborted?
-        @current.aborted?
-      end
-
-      def clear_abort
-        @current.clear_abort
-      end
     end
   end
 end

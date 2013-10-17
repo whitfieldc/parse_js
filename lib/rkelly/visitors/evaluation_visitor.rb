@@ -1,4 +1,5 @@
 require 'rkelly/js'
+require 'rkelly/runtime/completion'
 
 module RKelly
   module Visitors
@@ -6,6 +7,9 @@ module RKelly
 
       # Shorthand for the value object creator
       VALUE = RKelly::JS::Value
+
+      # Shorthand for the completion object creator
+      COMPLETION = RKelly::Runtime::Completion
 
       # One shared NaN object
       NAN = RKelly::JS::NaN.new
@@ -19,10 +23,17 @@ module RKelly
       end
 
       def visit_SourceElementsNode(o)
-        o.value.each { |x|
-          return if scope_chain.aborted?
-          x.accept(self)
-        }
+        final_value = nil
+
+        o.value.each do |statement|
+          c = statement.accept(self)
+          return c if c.abrupt?
+
+          # remember the value of a last statement with a value.
+          final_value = c.value if c.value
+        end
+
+        COMPLETION[:normal, final_value]
       end
 
       ## 11 Expressions
@@ -301,6 +312,7 @@ module RKelly
       ## 12.2 Variable Statement
       def visit_VarStatementNode(o)
         o.value.each { |x| x.accept(self) }
+        COMPLETION[:normal]
       end
 
       def visit_VarDeclNode(o)
@@ -312,11 +324,12 @@ module RKelly
       ## 12.3 Empty Statement
       def visit_EmptyStatementNode(o)
         # do nothing
+        COMPLETION[:normal]
       end
 
       ## 12.4 Expression Statement
       def visit_ExpressionStatementNode(o)
-        o.value.accept(self)
+        COMPLETION[:normal, o.value.accept(self)]
       end
 
       ## 12.5 If Statement
@@ -325,78 +338,95 @@ module RKelly
           o.value.accept(self)
         elsif o.else
           o.else.accept(self)
+        else
+          COMPLETION[:normal]
         end
       end
 
       ## 12.6 Iteration Statements
       def visit_DoWhileNode(o)
-        begin
-          o.left.accept(self)
+        final_value = nil
 
-          if scope_chain.abort_type == :continue
-            scope_chain.clear_abort
-            next
-          elsif scope_chain.aborted?
-            break
+        begin
+          c = o.left.accept(self)
+
+          final_value = c.value if c.value
+
+          if c.type == :continue
+            # do nothing
+          elsif c.type == :break
+            return COMPLETION[:normal, final_value]
+          elsif c.abrupt?
+            return c
           end
         end while to_boolean(o.value.accept(self)).value
 
-        clear_break_after_loop
+        COMPLETION[:normal, final_value]
       end
 
       def visit_WhileNode(o)
-        while to_boolean(o.left.accept(self)).value
-          o.value.accept(self)
+        final_value = nil
 
-          if scope_chain.abort_type == :continue
-            scope_chain.clear_abort
-            next
-          elsif scope_chain.aborted?
-            break
+        while to_boolean(o.left.accept(self)).value
+          c = o.value.accept(self)
+
+          final_value = c.value if c.value
+
+          if c.type == :continue
+            # do nothing
+          elsif c.type == :break
+            return COMPLETION[:normal, final_value]
+          elsif c.abrupt?
+            return c
           end
         end
 
-        clear_break_after_loop
+        COMPLETION[:normal, final_value]
       end
 
       def visit_ForNode(o)
+        final_value = nil
         o.init.accept(self) if o.init
-        while (!o.test || to_boolean(o.test.accept(self)).value)
-          o.value.accept(self)
 
-          if scope_chain.abort_type == :continue
-            scope_chain.clear_abort
-            o.counter.accept(self) if o.counter
-            next
-          elsif scope_chain.aborted?
-            break
+        while (!o.test || to_boolean(o.test.accept(self)).value)
+          c = o.value.accept(self)
+
+          final_value = c.value if c.value
+
+          if c.type == :continue
+            # do nothing
+          elsif c.type == :break
+            return COMPLETION[:normal, final_value]
+          elsif c.abrupt?
+            return c
           end
 
           o.counter.accept(self) if o.counter
         end
 
-        clear_break_after_loop
+        COMPLETION[:normal, final_value]
       end
 
       ## 12.8 The 'continue' Statement
       def visit_ContinueNode(o)
-        scope_chain.abort(:continue)
+        COMPLETION[:continue]
       end
 
       ## 12.8 The 'break' Statement
       def visit_BreakNode(o)
-        scope_chain.abort(:break)
+        COMPLETION[:break]
       end
 
       ## 12.9 The 'return' Statement
       def visit_ReturnNode(o)
-        scope_chain.abort(:return, o.value ? o.value.accept(self) : VALUE[:undefined])
+        COMPLETION[:return, o.value ? o.value.accept(self) : VALUE[:undefined]]
       end
 
 
       ## 13 Function Definition
 
       def visit_FunctionDeclNode(o)
+        COMPLETION[:normal]
       end
 
       def visit_FunctionExprNode(o)
@@ -404,8 +434,12 @@ module RKelly
       end
 
       def visit_FunctionBodyNode(o)
-        o.value.accept(self)
-        scope_chain.abort_value || VALUE[:undefined]
+        c = o.value.accept(self)
+        if c.type == :return && c.value
+          c.value
+        else
+          VALUE[:undefined]
+        end
       end
 
       %w{
@@ -565,13 +599,6 @@ module RKelly
           else
             VALUE[yield(left, right)]
           end
-        end
-      end
-
-      # When loop exited with a break, mark the abortion as handled.
-      def clear_break_after_loop
-        if scope_chain.abort_type == :break
-          scope_chain.clear_abort
         end
       end
 
