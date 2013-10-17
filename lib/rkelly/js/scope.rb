@@ -3,9 +3,15 @@ module RKelly
     class Scope < Base
       attr_reader :abort_type, :abort_value
 
-      def initialize
-        super
+      def initialize(parent_scope=nil)
+        super()
+        @parent = parent_scope
         clear_abort
+      end
+
+      # Returns the parent scope
+      def parent
+        @parent
       end
 
       # Forces execution in this scope to be aborted.

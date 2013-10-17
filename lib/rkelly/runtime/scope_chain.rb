@@ -3,64 +3,63 @@ module RKelly
     class ScopeChain
       include RKelly::JS
 
-      def initialize(scope = Scope.new)
-        @chain = [GlobalObject.new]
-      end
-
-      def <<(scope)
-        @chain << scope
+      def initialize(scope = GlobalObject.new)
+        @current = scope
       end
 
       def has_property?(name)
-        scope = @chain.reverse.find { |x|
-          x.has_property?(name)
-        }
+        scope = @current
+        while scope
+          break if scope.has_property?(name)
+          scope = scope.parent
+        end
+
         scope ? scope[name] : nil
       end
 
       def [](name)
         property = has_property?(name)
         return property if property
-        @chain.last.properties[name]
+        @current.properties[name]
       end
 
       def []=(name, value)
-        @chain.last.properties[name] = value
+        @current.properties[name] = value
       end
 
       def pop
-        @chain.pop
+        @current = @current.parent
       end
 
       def this
-        @chain.last
+        @current
       end
 
       def new_scope(&block)
-        @chain << Scope.new
+        @current = Scope.new(@current)
         result = yield(self)
-        @chain.pop
+        @current = @current.parent
         result
       end
 
       def abort(type, value=nil)
-        @chain.last.abort(type, value)
+        @current.abort(type, value)
       end
 
       def abort_type
-        @chain.last.abort_type
+        @current.abort_type
       end
 
       def abort_value
-        @chain.last.abort_value
+        @current.abort_value
       end
 
       def aborted?
-        @chain.last.aborted?
+        @current.aborted?
       end
 
       def clear_abort
-        @chain.last.clear_abort
+        @current.clear_abort
       end
     end
   end
