@@ -22,20 +22,6 @@ module RKelly
         @operand = []
       end
 
-      def visit_SourceElementsNode(o)
-        final_value = nil
-
-        o.value.each do |statement|
-          c = statement.accept(self)
-          return c if c.abrupt?
-
-          # remember the value of a last statement with a value.
-          final_value = c.value if c.value
-        end
-
-        COMPLETION[:normal, final_value]
-      end
-
       ## 11 Expressions
 
       ## 11.1 Primary Expressions
@@ -307,6 +293,20 @@ module RKelly
       ## 12.1 Block
       def visit_BlockNode(o)
         o.value.accept(self)
+      end
+
+      def visit_SourceElementsNode(o)
+        final_value = nil
+
+        o.value.each do |statement|
+          c = statement.accept(self)
+          return c if c.abrupt?
+
+          # remember the value of a last statement with a value.
+          final_value = c.value if c.value
+        end
+
+        COMPLETION[:normal, final_value]
       end
 
       ## 12.2 Variable Statement
