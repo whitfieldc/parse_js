@@ -1,30 +1,34 @@
+require 'rkelly/env/declarative_record'
+require 'rkelly/env/object_record'
+require 'rkelly/js/global_object'
+
 module RKelly
-  module JS
+  module Env
     # Represents a Lexical Environment that points to its outer
     # Lexical Environment (or nil) and hosts an environment record
-    # (Object- or DeclarativeEnvironmentRecord) which stores the
+    # (ObjectRecord or DeclarativeRecord) which stores the
     # actual variable bindings.
-    class LexicalEnvironment
+    class Lexical
       attr_reader :record, :outer
 
-      def initialize(outer=nil, record=DeclarativeEnvironmentRecord.new)
+      def initialize(outer=nil, record=Env::DeclarativeRecord.new)
         @record = record
         @outer = outer
       end
 
       # Static factory method for the global environment.
-      def self.new_global_environment
-        LexicalEnvironment.new(nil, ObjectEnvironmentRecord.new(GlobalObject.new))
+      def self.new_global
+        Env::Lexical.new(nil, Env::ObjectRecord.new(JS::GlobalObject.new))
       end
 
       # Creates new Declarative Environment with reference to this env.
-      def new_declarative_environment
-        LexicalEnvironment.new(self)
+      def new_declarative
+        Env::Lexical.new(self)
       end
 
       # Creates new Object Environment with reference to this env.
-      def new_object_environment(obj)
-        LexicalEnvironment.new(self, ObjectEnvironmentRecord.new(obj))
+      def new_object(obj)
+        Env::Lexical.new(self, Env::ObjectRecord.new(obj))
       end
 
       # Retrieves the variable (Property object) from this or one of

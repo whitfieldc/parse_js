@@ -1,5 +1,5 @@
 module RKelly
-  module JS
+  module Env
     # Object Environment Record is associated with an object, on which
     # it operates, setting and getting its properties.
     #
@@ -7,7 +7,7 @@ module RKelly
     #
     #   env_record[var_name] = VALUE[:undefined]
     #
-    class ObjectEnvironmentRecord
+    class ObjectRecord
       def initialize(obj)
         @obj = obj
       end

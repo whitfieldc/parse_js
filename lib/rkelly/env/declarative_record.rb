@@ -1,5 +1,5 @@
 module RKelly
-  module JS
+  module Env
     # Use Ruby hash as the Declarative Environment Record, and use the
     # following methods to get/set bindings:
     #
@@ -12,7 +12,7 @@ module RKelly
     #
     #   env_record[var_name] = VALUE[:undefined]
     #
-    class DeclarativeEnvironmentRecord < ::Hash
+    class DeclarativeRecord < ::Hash
       alias :has_binding? :has_key?
     end
   end

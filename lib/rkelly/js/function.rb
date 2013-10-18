@@ -27,7 +27,7 @@ module RKelly
       end
 
       def js_call(*params)
-        env = @outer_environment.new_declarative_environment
+        env = @outer_environment.new_declarative
 
         arguments.each_with_index { |name, i|
           env.record[name.value] = params[i] || RKelly::Runtime::UNDEFINED

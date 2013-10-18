@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + "/helper"
 class EvaluationVisitorTest < Test::Unit::TestCase
   def setup
     @parser = RKelly::Parser.new
-    @env = RKelly::JS::LexicalEnvironment.new_global_environment
+    @env = RKelly::Env::Lexical.new_global
     @fun_visitor = RKelly::Visitors::FunctionVisitor.new(@env)
     @eval_visitor = RKelly::Visitors::EvaluationVisitor.new(@env)
   end

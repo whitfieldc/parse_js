@@ -1,4 +1,5 @@
 require 'rkelly/js'
+require 'rkelly/env/lexical'
 
 module RKelly
   class Runtime
@@ -6,7 +7,7 @@ module RKelly
 
     def initialize
       @parser = Parser.new
-      @env = JS::LexicalEnvironment.new_global_environment
+      @env = Env::Lexical.new_global
     end
 
     # Execute +js+
