@@ -26,7 +26,7 @@ module RKelly
         self['length'] = arguments.length
       end
 
-      def js_call(*params)
+      def call(*params)
         env = @outer_environment.new_declarative
 
         arguments.each_with_index { |name, i|

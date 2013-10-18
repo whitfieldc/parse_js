@@ -17,4 +17,11 @@ class RuntimeTest < Test::Unit::TestCase
     @runtime.execute("one();")
   end
 
+  def test_define_function_and_call_function
+    @runtime.define_function(:one) do |*args|
+      return 1
+    end
+    assert_equal(1, @runtime.call_function("one"))
+  end
+
 end

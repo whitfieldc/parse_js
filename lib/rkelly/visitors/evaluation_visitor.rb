@@ -566,8 +566,8 @@ module RKelly
       def call_function(property, arguments = [])
         function  = property.function || property.value
         case function
-        when RKelly::JS::Function
-          function.js_call(*arguments)
+        when JS::Function, JS::RubyFunction
+          function.call(*arguments)
         when UnboundMethod
           VALUE[function.bind(property.binder).call(*(arguments.map { |x| x.value}))]
         else
