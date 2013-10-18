@@ -49,4 +49,13 @@ class Typeof_11_4_3_Typeof_Test < ExecuteTestCase
   def test_typeof_zero_string
     assert_execute({ 'x' => 'string' }, "var x = typeof('0');")
   end
+
+  def test_typeof_function
+    assert_execute({ 'x' => 'function' }, "function foo() {} var x = typeof(foo);")
+  end
+
+  def test_typeof_function_expression
+    assert_execute({ 'x' => 'function' }, "var x = typeof(function(){});")
+  end
+
 end

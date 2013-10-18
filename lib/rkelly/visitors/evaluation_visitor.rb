@@ -106,10 +106,11 @@ module RKelly
 
       ## 11.4.3 The 'typeof' Operator
       def visit_TypeOfNode(o)
-        val = o.value.accept(self)
-        return VALUE['object'] if val.value.nil?
+        val = o.value.accept(self).value
+        return VALUE['object'] if val.nil?
+        return VALUE['function'] if val.respond_to?(:call)
 
-        case val.value
+        case val
         when String
           VALUE['string']
         when Numeric
