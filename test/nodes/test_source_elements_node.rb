@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) + "/helper"
+require File.dirname(__FILE__) + "/../helper"
 
-class SourceElementListTest < NodeTestCase
+class SourceElementsNodeTest < NodeTestCase
   def test_to_sexp
     num = NumberNode.new(10)
     node = SourceElementsNode.new([num, num])
