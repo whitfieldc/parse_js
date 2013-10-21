@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/helper"
 
-class CharRangeTest < NodeTestCase
+class CharRangeTest < Test::Unit::TestCase
   def test_advancing_empty_range
     a = RKelly::CharRange::EMPTY
     b = a.next("foo")

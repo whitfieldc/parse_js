@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/helper"
 
-class CommentsTest < NodeTestCase
+class CommentsTest < Test::Unit::TestCase
   def test_some_comments
     parser = RKelly::Parser.new
     ast = parser.parse(<<-eojs)

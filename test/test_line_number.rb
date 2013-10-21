@@ -1,6 +1,8 @@
 require File.dirname(__FILE__) + "/helper"
 
-class LineNumberTest < NodeTestCase
+class LineNumberTest < Test::Unit::TestCase
+  include RKelly::Nodes
+
   def test_line_numbers
     parser = RKelly::Parser.new
     ast = parser.parse(<<-eojs)

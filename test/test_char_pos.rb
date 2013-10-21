@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/helper"
 
-class CharPosTest < NodeTestCase
+class CharPosTest < Test::Unit::TestCase
   def test_advancing_empty_position
     a = RKelly::CharPos::EMPTY
     b = a.next("foo")
