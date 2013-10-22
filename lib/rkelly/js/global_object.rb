@@ -3,7 +3,7 @@ module RKelly
     class GlobalObject < Base
       def initialize
         super
-        self['Class'] = VALUE['GlobalObject']
+        @class_name = 'GlobalObject'
 
         self['NaN'] = VALUE[JS::NaN.new]
         self['NaN'].attributes << :dont_enum

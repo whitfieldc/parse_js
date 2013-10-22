@@ -6,7 +6,7 @@ module RKelly
       def initialize
         super
         self['toString'].function = unbound_method(:toString) do
-          "[object #{self['Class'].value}]"
+          "[object #{@class_name}]"
         end
       end
     end

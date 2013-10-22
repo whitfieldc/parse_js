@@ -1,13 +1,14 @@
 module RKelly
   module JS
     class Base
-      attr_reader :properties, :value
+      attr_reader :properties, :value, :class_name
       def initialize
         @properties = Hash.new { |h,k|
           h[k] = Property.new(k, :undefined, self)
         }
-        @value      = self
-        self['Class'] = VALUE[self.class.to_s.split('::').last]
+        @value = self
+        # The [[Class]] internal property from ECMASCript spec.
+        @class_name = self.class.to_s.split('::').last
       end
 
       def [](name)

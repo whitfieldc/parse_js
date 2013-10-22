@@ -10,7 +10,7 @@ class GlobalObjectTest < Test::Unit::TestCase
 
   def test_initialize
     assert_equal :undefined, @object['prototype'].value
-    assert_equal 'GlobalObject', @object['Class'].value
+    assert_equal 'GlobalObject', @object.class_name
   end
 
   def test_braces

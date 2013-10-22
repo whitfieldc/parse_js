@@ -5,7 +5,7 @@ module RKelly
     class FunctionPrototype < ObjectPrototype
       def initialize(function)
         super()
-        self['Class'] = VALUE['Object']
+        @class_name = 'Object'
         self['constructor'] = VALUE[function]
         self['arguments'].value = nil
       end
