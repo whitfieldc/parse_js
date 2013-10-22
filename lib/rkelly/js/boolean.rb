@@ -10,11 +10,11 @@ module RKelly
       def initialize(*args)
         super()
         value = args.first.nil? ? false : args.first
-        self['valueOf'] = value
+        self['valueOf'] = VALUE[value]
         self['valueOf'].function = lambda {
           value
         }
-        self['toString'] = args.first.to_s
+        self['toString'] = VALUE[args.first.to_s]
       end
     end
   end

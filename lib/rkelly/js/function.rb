@@ -21,9 +21,9 @@ module RKelly
         @body = body
         @arguments = arguments
         @outer_environment = outer_environment
-        self['prototype'] = JS::FunctionPrototype.new(self)
-        self['toString'] = :undefined
-        self['length'] = arguments.length
+        self['prototype'] = VALUE[JS::FunctionPrototype.new(self)]
+        self['toString'] = VALUE[:undefined]
+        self['length'] = VALUE[arguments.length]
       end
 
       def call(*params)

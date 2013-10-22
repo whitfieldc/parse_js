@@ -6,13 +6,13 @@ module RKelly
       def initialize(&block)
         super()
         @code = block
-        self['prototype'] = JS::FunctionPrototype.new(self)
-        self['toString'] = :undefined
-        self['length'] = 0
+        self['prototype'] = VALUE[JS::FunctionPrototype.new(self)]
+        self['toString'] = VALUE[:undefined]
+        self['length'] = VALUE[0]
       end
 
       def call(*args)
-        JS::Value[ @code.call(*(args.map { |x| x.value })) ]
+        VALUE[ @code.call(*(args.map { |x| x.value })) ]
       end
     end
   end

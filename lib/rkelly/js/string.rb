@@ -9,12 +9,12 @@ module RKelly
 
       def initialize(value)
         super()
-        self['valueOf'] = value
+        self['valueOf'] = VALUE[value]
         self['valueOf'].function = lambda { value }
-        self['toString'] = value
-        self['fromCharCode'] = unbound_method(:fromCharCode) { |*args|
+        self['toString'] = VALUE[value]
+        self['fromCharCode'] = VALUE[unbound_method(:fromCharCode) { |*args|
           args.map { |x| x.chr }.join
-        }
+        }]
       end
     end
   end

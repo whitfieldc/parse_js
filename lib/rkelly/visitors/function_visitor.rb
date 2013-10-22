@@ -4,7 +4,7 @@ module RKelly
   module Visitors
     class FunctionVisitor < Visitor
 
-      VALUE = RKelly::JS::Value
+      VALUE = RKelly::JS::VALUE
 
       def initialize(environment)
         super()

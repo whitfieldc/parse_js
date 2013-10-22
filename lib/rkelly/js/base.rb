@@ -7,7 +7,7 @@ module RKelly
           h[k] = Property.new(k, :undefined, self)
         }
         @value      = self
-        self['Class'] = self.class.to_s.split('::').last
+        self['Class'] = VALUE[self.class.to_s.split('::').last]
       end
 
       def [](name)
@@ -21,11 +21,7 @@ module RKelly
 
       def []=(name, value)
         return unless can_put?(name)
-        if has_property?(name)
-          self.properties[name].value = value
-        else
-          self.properties[name] = Property.new(name, value, self)
-        end
+        self.properties[name] = value
       end
 
       def can_put?(name)

@@ -3,7 +3,7 @@ module RKelly
     class Math < Base
       def initialize
         super
-        self['PI'] = ::Math::PI
+        self['PI'] = VALUE[::Math::PI]
       end
     end
   end

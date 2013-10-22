@@ -25,8 +25,7 @@ module RKelly
       end
 
       def []=(name, value)
-        # as a temporary hack, unwrap the value
-        @obj[name] = value.value
+        @obj[name] = value
       end
     end
   end

@@ -6,7 +6,7 @@ module RKelly
     class EvaluationVisitor < Visitor
 
       # Shorthand for the value object creator
-      VALUE = RKelly::JS::Value
+      VALUE = RKelly::JS::VALUE
 
       # Shorthand for the completion object creator
       COMPLETION = RKelly::Runtime::Completion

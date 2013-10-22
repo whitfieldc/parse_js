@@ -21,8 +21,8 @@ module RKelly
 
       def initialize(*args)
         super()
-        self['prototype'] = JS::ObjectPrototype.new
-        self['valueOf'] = lambda { args.first || self }
+        self['prototype'] = VALUE[JS::ObjectPrototype.new]
+        self['valueOf'] = VALUE[lambda { args.first || self }]
         self['valueOf'].function = lambda { args.first || self }
       end
     end

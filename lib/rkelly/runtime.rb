@@ -4,7 +4,7 @@ require 'rkelly/env/lexical'
 module RKelly
   class Runtime
     UNDEFINED = RKelly::JS::Property.new(:undefined, :undefined)
-    VALUE = RKelly::JS::Value
+    VALUE = RKelly::JS::VALUE
 
     def initialize
       @parser = Parser.new
