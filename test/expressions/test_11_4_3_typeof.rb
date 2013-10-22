@@ -62,7 +62,7 @@ class Typeof_11_4_3_Typeof_Test < ExecuteTestCase
     assert_execute({ 'x' => 'function' }, "var x = typeof(new Function());")
   end
 
-  def test_typeof_Function_prototype
+  def disabled_test_typeof_Function_prototype
     assert_execute({ 'x' => 'object' }, "var x = typeof(Function.prototype);")
   end
 

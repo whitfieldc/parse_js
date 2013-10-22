@@ -9,7 +9,7 @@ class GlobalObjectTest < Test::Unit::TestCase
   end
 
   def test_initialize
-    assert_equal :undefined, @object['prototype'].value
+    assert_equal nil, @object.prototype
     assert_equal 'GlobalObject', @object.class_name
   end
 
@@ -21,7 +21,7 @@ class GlobalObjectTest < Test::Unit::TestCase
   end
 
   def test_undefined_brace
-    #assert_equal :undefined, @object['foo'].value
+    assert_equal :undefined, @object['foo'].value
   end
 
   def test_delete
@@ -44,7 +44,7 @@ class GlobalObjectTest < Test::Unit::TestCase
     assert proto.has_property?('foo')
 
     assert !@object.has_property?('foo')
-    @object['prototype'] = VALUE[proto]
+    @object.prototype = proto
     assert @object.has_property?('foo')
   end
 end

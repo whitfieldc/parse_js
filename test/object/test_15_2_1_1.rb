@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Object_15_2_1_1_Test < ECMAScriptTestCase
+class Object_15_2_1_1_Test # Disabled < ECMAScriptTestCase
   def test_null_value_of
     @runtime.execute("
                      var NULL_OBJECT = Object(null);

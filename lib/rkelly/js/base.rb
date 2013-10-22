@@ -2,51 +2,49 @@ module RKelly
   module JS
     class Base
       attr_reader :properties, :value, :class_name
+      attr_accessor :prototype
       def initialize
         @properties = Hash.new { |h,k|
-          h[k] = Property.new(k, :undefined, self)
+          h[k] = VALUE[:undefined]
         }
         @value = self
         # The [[Class]] internal property from ECMASCript spec.
         @class_name = self.class.to_s.split('::').last
+        @prototype = nil
       end
 
       def [](name)
-        return self.properties[name] if has_property?(name)
-        if self.properties['prototype'].value != :undefined
-          self.properties['prototype'].value[name]
+        return @properties[name] if has_property?(name)
+        if @prototype
+          @prototype[name]
         else
-          RKelly::Runtime::UNDEFINED
+          VALUE[:undefined]
         end
       end
 
       def []=(name, value)
         return unless can_put?(name)
-        self.properties[name] = value
+        @properties[name] = value
       end
 
       def can_put?(name)
         if !has_property?(name)
-          return true if self.properties['prototype'].nil?
-          return true if self.properties['prototype'].value.nil?
-          return true if self.properties['prototype'].value == :undefined
-          return self.properties['prototype'].value.can_put?(name)
+          return true if @prototype.nil?
+          return @prototype.can_put?(name)
         end
-        !self.properties[name].read_only?
+        !@properties[name].read_only?
       end
 
       def has_property?(name)
-        return true if self.properties.has_key?(name)
-        return false if self.properties['prototype'].nil?
-        return false if self.properties['prototype'].value.nil?
-        return false if self.properties['prototype'].value == :undefined
-        self.properties['prototype'].value.has_property?(name)
+        return true if @properties.has_key?(name)
+        return false if @prototype.nil?
+        @prototype.has_property?(name)
       end
 
       def delete(name)
         return true unless has_property?(name)
-        return false if self.properties[name].dont_delete?
-        self.properties.delete(name)
+        return false if @properties[name].dont_delete?
+        @properties.delete(name)
         true
       end
 

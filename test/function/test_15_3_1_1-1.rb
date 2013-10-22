@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Functions_15_3_1_1_1_Test < ECMAScriptTestCase
+class Functions_15_3_1_1_1_Test # Disabled < ECMAScriptTestCase
   def setup
     super
     @runtime.execute(<<END
