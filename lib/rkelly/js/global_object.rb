@@ -28,10 +28,9 @@ module RKelly
 
         self['Math'] = JS::Math.new
 
-        self['Function'] = :undefined
-        self['Function'].function = lambda { |*args|
+        self['Function'] = JS::RubyFunction.new do |*args|
           JS::Function.create(*args)
-        }
+        end
 
         self['Number'] = JS::Number.new
         self['Number'].function = lambda { |*args|
@@ -42,6 +41,7 @@ module RKelly
         self['Boolean'].function = lambda { |*args|
           JS::Boolean.create(*args)
         }
+
         self['String'] = JS::String.new('')
         self['String'].function = lambda { |*args|
           JS::String.create(*args)

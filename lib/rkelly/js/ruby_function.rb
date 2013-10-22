@@ -6,6 +6,9 @@ module RKelly
       def initialize(&block)
         super()
         @code = block
+        self['prototype'] = JS::FunctionPrototype.new(self)
+        self['toString'] = :undefined
+        self['length'] = 0
       end
 
       def call(*args)
