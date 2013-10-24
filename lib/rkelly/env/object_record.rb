@@ -8,6 +8,8 @@ module RKelly
     #   env_record[var_name] = VALUE[:undefined]
     #
     class ObjectRecord
+      attr_reader :obj
+
       def initialize(obj)
         @obj = obj
       end

@@ -17,17 +17,19 @@ module RKelly
         self['undefined'].attributes << :dont_enum
         self['undefined'].attributes << :dont_delete
 
-        self['Array'] = VALUE[JS::RubyFunction.new do |*args|
-          JS::Array.create(*args)
-        end]
-
-        self['Object'] = VALUE[JS::RubyFunction.new do |*args|
+        self['Object'] = VALUE[JS::RubyFunction.new do |this, *args|
           JS::Object.create(*args)
+        end]
+        self['Object'].value['prototype'] = VALUE[JS::ObjectPrototype.new]
+
+
+        self['Array'] = VALUE[JS::RubyFunction.new do |this, *args|
+          JS::Array.create(*args)
         end]
 
         self['Math'] = VALUE[JS::Math.new]
 
-        self['Function'] = VALUE[JS::RubyFunction.new do |*args|
+        self['Function'] = VALUE[JS::RubyFunction.new do |this, *args|
           JS::Function.create(*args)
         end]
 
@@ -36,7 +38,7 @@ module RKelly
           JS::Number.create(*args)
         }
 
-        self['Boolean'] = VALUE[JS::RubyFunction.new do |*args|
+        self['Boolean'] = VALUE[JS::RubyFunction.new do |this, *args|
           JS::Boolean.create(*args)
         end]
 

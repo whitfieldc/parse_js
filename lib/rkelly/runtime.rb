@@ -23,7 +23,8 @@ module RKelly
 
     def call_function(function_name, *args)
       function = @env[function_name].value
-      function.call( *(args.map {|x| VALUE[x] }) ).value
+      this = @env.global_object
+      function.call(this, *(args.map {|x| VALUE[x] }) ).value
     end
 
     def define_function(name, &block)

@@ -7,10 +7,10 @@ class ECMAScriptTestCase < Test::Unit::TestCase
 
   def setup
     @runtime = RKelly::Runtime.new
-    @runtime.define_function(:assert_equal) do |*args|
+    @runtime.define_function(:assert_equal) do |this, *args|
       assert_equal(*args)
     end
-    @runtime.define_function(:assert_in_delta) do |*args|
+    @runtime.define_function(:assert_in_delta) do |this, *args|
       assert_in_delta(*args)
     end
   end

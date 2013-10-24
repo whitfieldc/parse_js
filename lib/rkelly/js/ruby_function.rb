@@ -11,8 +11,8 @@ module RKelly
         self['length'] = VALUE[0]
       end
 
-      def call(*args)
-        VALUE[ @code.call(*(args.map { |x| x.value })) ]
+      def call(this, *args)
+        VALUE[ @code.call(this.value, *(args.map { |x| x.value })) ]
       end
     end
   end

@@ -26,7 +26,7 @@ module RKelly
 
       ## 11.1.1 The 'this' Reference
       def visit_ThisNode(o)
-        VALUE[@environment]
+        @environment.this
       end
 
       ## 11.1.2 Identifier Reference
@@ -566,9 +566,10 @@ module RKelly
 
       def call_function(property, arguments = [])
         function  = property.function || property.value
+        this = property.binder || @environment.global_object
         case function
         when JS::Function, JS::RubyFunction
-          function.call(*arguments)
+          function.call(this, *arguments)
         when UnboundMethod
           VALUE[function.bind(property.binder).call(*(arguments.map { |x| x.value}))]
         else

@@ -11,14 +11,14 @@ class RuntimeTest < Test::Unit::TestCase
   end
 
   def test_define_function
-    @runtime.define_function(:one) do |*args|
+    @runtime.define_function(:one) do |this, *args|
       return 1
     end
     @runtime.execute("one();")
   end
 
   def test_define_function_and_call_function
-    @runtime.define_function(:one) do |*args|
+    @runtime.define_function(:one) do |this, *args|
       return 1
     end
     assert_equal(1, @runtime.call_function("one"))

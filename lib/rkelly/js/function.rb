@@ -26,8 +26,9 @@ module RKelly
         self['length'] = VALUE[arguments.length]
       end
 
-      def call(*params)
+      def call(this, *params)
         env = @outer_environment.new_declarative
+        env.this = this
 
         arguments.each_with_index { |name, i|
           env.record[name.value] = params[i] || RKelly::Runtime::UNDEFINED
@@ -39,6 +40,7 @@ module RKelly
         eval_visitor = RKelly::Visitors::EvaluationVisitor.new(env)
         body.accept(eval_visitor) if body
       end
+
     end
   end
 end

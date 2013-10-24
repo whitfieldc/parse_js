@@ -1,6 +1,7 @@
 require 'rkelly/env/declarative_record'
 require 'rkelly/env/object_record'
 require 'rkelly/js/global_object'
+require 'rkelly/js/value'
 
 module RKelly
   module Env
@@ -9,11 +10,25 @@ module RKelly
     # (ObjectRecord or DeclarativeRecord) which stores the
     # actual variable bindings.
     class Lexical
-      attr_reader :record, :outer
+      attr_reader :record, :outer, :global_object
+
+      # ThisBinding within this execution context.
+      attr_accessor :this
 
       def initialize(outer=nil, record=Env::DeclarativeRecord.new)
         @record = record
         @outer = outer
+        @this = nil
+
+        # Always maintain a reference to the global object, so we can
+        # quickly return it without special lookup.
+        if outer && outer.global_object
+          @global_object = outer.global_object
+        else
+          @global_object = JS::VALUE[record.obj]
+        end
+
+        @this = @global_object
       end
 
       # Static factory method for the global environment.
