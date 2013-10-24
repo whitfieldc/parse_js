@@ -1,3 +1,5 @@
+require 'rkelly/nodes'
+
 module RKelly
   module JS
     class Function < Base
@@ -15,10 +17,9 @@ module RKelly
         end
       end
 
-      attr_reader :body, :arguments
-      def initialize(body = nil, arguments = [], outer_environment=nil)
+      def initialize(body=nil, arguments = [], outer_environment=nil)
         super()
-        @body = body
+        @body = body || Nodes::FunctionBodyNode.new(Nodes::SourceElementsNode.new([]))
         @arguments = arguments
         @outer_environment = outer_environment
         @prototype = JS::FunctionPrototype.new(self)
@@ -30,15 +31,12 @@ module RKelly
         env = @outer_environment.new_declarative
         env.this = this
 
-        arguments.each_with_index { |name, i|
+        @arguments.each_with_index { |name, i|
           env.record[name.value] = params[i] || RKelly::Runtime::UNDEFINED
         }
 
-        function_visitor = RKelly::Visitors::FunctionVisitor.new(env)
-        body.accept(function_visitor) if body
-
-        eval_visitor = RKelly::Visitors::EvaluationVisitor.new(env)
-        body.accept(eval_visitor) if body
+        @body.accept(RKelly::Visitors::FunctionVisitor.new(env))
+        @body.accept(RKelly::Visitors::EvaluationVisitor.new(env))
       end
 
     end
