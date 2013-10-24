@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Expressions_11_6_1_Boolean_Addition_Test < ECMAScriptTestCase
+class Expressions_11_6_1_Boolean_Addition_Test # Disabled < ECMAScriptTestCase
   def test_primitive_boolean
     js_assert_equal("1", "true + false")
   end

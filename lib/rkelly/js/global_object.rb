@@ -17,11 +17,8 @@ module RKelly
         self['undefined'].attributes << :dont_enum
         self['undefined'].attributes << :dont_delete
 
-        self['Object'] = VALUE[JS::RubyFunction.new do |this, *args|
-          JS::Object.create(*args)
-        end]
+        self['Object'] = VALUE[JS::RubyFunction.new]
         self['Object'].value['prototype'] = VALUE[JS::ObjectPrototype.new]
-
 
         self['Array'] = VALUE[JS::RubyFunction.new do |this, *args|
           JS::Array.create(*args)

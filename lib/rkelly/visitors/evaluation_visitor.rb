@@ -67,7 +67,9 @@ module RKelly
 
       ## 11.2.2 The 'new' Operator
       def visit_NewExprNode(o)
-        visit_FunctionCallNode(o)
+        fn = o.value.accept(self)
+        args = o.arguments.accept(self)
+        fn.value.construct(*args)
       end
 
       ## 11.2.3 Function Calls

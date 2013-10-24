@@ -9,7 +9,7 @@ module RKelly
         }
         @value = self
         # The [[Class]] internal property from ECMASCript spec.
-        @class_name = self.class.to_s.split('::').last
+        @class_name = "Object"
         @prototype = nil
       end
 

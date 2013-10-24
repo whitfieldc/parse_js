@@ -1,11 +1,13 @@
-require 'rkelly/js/value'
+require 'rkelly/js/constructable'
 
 module RKelly
   module JS
     class RubyFunction < Base
+      include Constructable
+
       def initialize(&block)
         super()
-        @code = block
+        @code = block || lambda {|this, *args| }
         @prototype = JS::FunctionPrototype.new(self)
         self['toString'] = VALUE[:undefined]
         self['length'] = VALUE[0]

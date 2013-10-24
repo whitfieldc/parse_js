@@ -1,4 +1,5 @@
 require 'rkelly/nodes'
+require 'rkelly/js/constructable'
 
 module RKelly
   module JS
@@ -16,6 +17,8 @@ module RKelly
           end
         end
       end
+
+      include Constructable
 
       def initialize(body=nil, arguments = [], outer_environment=nil)
         super()
