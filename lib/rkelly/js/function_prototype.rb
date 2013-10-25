@@ -2,7 +2,7 @@ module RKelly
   module JS
     # This is the object protytpe
     # ECMA-262 15.2.4
-    class FunctionPrototype < ObjectPrototype
+    class FunctionPrototype < Base
       def initialize(function)
         super()
         @class_name = 'Object'

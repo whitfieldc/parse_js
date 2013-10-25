@@ -14,7 +14,7 @@ module RKelly
       end
 
       def [](name)
-        return @properties[name] if has_property?(name)
+        return @properties[name] if @properties.has_key?(name)
         if @prototype
           @prototype[name]
         else
