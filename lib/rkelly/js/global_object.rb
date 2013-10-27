@@ -20,24 +20,10 @@ module RKelly
         self['Object'] = VALUE[JS::RubyFunction.new]
         self['Object'].value['prototype'] = VALUE[JS::ObjectPrototype.new]
 
-        self['Array'] = VALUE[JS::RubyFunction.new do |this, *args|
-          JS::Array.create(*args)
-        end]
-
-        self['Math'] = VALUE[JS::Math.new]
-
-        self['Function'] = VALUE[JS::RubyFunction.new do |this, *args|
-          JS::Function.create(*args)
-        end]
-
         self['Number'] = VALUE[JS::Number.new]
         self['Number'].function = lambda { |*args|
           JS::Number.create(*args)
         }
-
-        self['Boolean'] = VALUE[JS::RubyFunction.new do |this, *args|
-          JS::Boolean.create(*args)
-        end]
 
         self['String'] = VALUE[JS::String.new('')]
         self['String'].function = lambda { |*args|
