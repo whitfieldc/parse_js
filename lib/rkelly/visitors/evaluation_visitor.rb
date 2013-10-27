@@ -1,12 +1,10 @@
 require 'rkelly/js'
 require 'rkelly/runtime/completion'
+require 'rkelly/runtime/reference'
 
 module RKelly
   module Visitors
     class EvaluationVisitor < Visitor
-
-      # Shorthand for the value object creator
-      VALUE = RKelly::JS::VALUE
 
       # Shorthand for the completion object creator
       COMPLETION = RKelly::Runtime::Completion
@@ -36,64 +34,67 @@ module RKelly
 
       ## 11.1.3 Literal Reference
       def visit_NullNode(o)
-        VALUE[nil]
+        nil
       end
 
       def visit_TrueNode(o)
-        VALUE[true]
+        true
       end
 
       def visit_FalseNode(o)
-        VALUE[false]
+        false
       end
 
       def visit_StringNode(o)
-        VALUE[o.value.gsub(/\A['"]/, '').gsub(/['"]$/, '')]
+        o.value.gsub(/\A['"]/, '').gsub(/['"]$/, '')
       end
 
       def visit_NumberNode(o)
-        VALUE[o.value]
+        o.value
       end
 
       ## 11.1.5 Object Initialiser
 
       def visit_ObjectLiteralNode(o)
-        obj = @environment["Object"].value.construct().value
+        obj = @environment["Object"].construct()
         o.value.each do |prop|
           obj[prop.name] = prop.value.accept(self)
         end
-        VALUE[obj]
+        obj
       end
 
       ## 11.2 Left-Hand-Side Expressions
 
       ## 11.2.1 Property Accessors
       def visit_DotAccessorNode(o)
-        left = o.value.accept(self)
-        right = left.value[o.accessor]
-        right.binder = left.value
-        right
+        obj = o.value.accept(self)
+        obj[o.accessor]
       end
 
       def visit_BracketAccessorNode(o)
-        left = o.value.accept(self)
-        right = left.value[o.accessor.accept(self).value]
-        right.binder = left.value
-        right
+        obj = o.value.accept(self)
+        obj[o.accessor.accept(self)]
       end
 
       ## 11.2.2 The 'new' Operator
       def visit_NewExprNode(o)
         fn = o.value.accept(self)
         args = o.arguments.accept(self)
-        fn.value.construct(*args)
+        fn.construct(*args)
       end
 
       ## 11.2.3 Function Calls
       def visit_FunctionCallNode(o)
-        left      = o.value.accept(self)
-        arguments = o.arguments.accept(self)
-        call_function(left, arguments)
+        ref = make_reference(o.value)
+        args = o.arguments.accept(self)
+
+        if ref.bound_to_object?
+          # When obj.fun() syntax used
+          call_function(ref.value, ref.binder, args)
+        else
+          # When fun() syntax used
+          call_function(ref.value, nil, args)
+        end
       end
 
       ## 11.2.4 Argument Lists
@@ -104,13 +105,13 @@ module RKelly
       ## 11.3 Postfix Expressions
 
       def visit_PostfixNode(o)
-        orig = o.operand.accept(self)
-        number = to_number(orig)
+        ref = make_reference(o.operand)
+        number = to_number(ref.value)
         case o.value
         when '++'
-          orig.value = number.value + 1
+          ref.value = number + 1
         when '--'
-          orig.value = number.value - 1
+          ref.value = number - 1
         end
         number
       end
@@ -120,43 +121,43 @@ module RKelly
       ## 11.4.2 The 'void' Operator
       def visit_VoidNode(o)
         o.value.accept(self)
-        VALUE[:undefined]
+        :undefined
       end
 
       ## 11.4.3 The 'typeof' Operator
       def visit_TypeOfNode(o)
-        val = o.value.accept(self).value
-        return VALUE['object'] if val.nil?
-        return VALUE['function'] if val.respond_to?(:call)
+        val = o.value.accept(self)
+        return 'object' if val.nil?
+        return 'function' if val.respond_to?(:call)
 
         case val
         when String
-          VALUE['string']
+          'string'
         when Numeric
-          VALUE['number']
+          'number'
         when true
-          VALUE['boolean']
+          'boolean'
         when false
-          VALUE['boolean']
+          'boolean'
         when :undefined
-          VALUE['undefined']
+          'undefined'
         else
-          VALUE['object']
+          'object'
         end
       end
 
       ## 11.4.4 Prefix Increment Operator
       ## 11.4.5 Prefix Decrement Operator
       def visit_PrefixNode(o)
-        orig = o.operand.accept(self)
-        number = to_number(orig)
+        ref = make_reference(o.operand)
+        number = to_number(ref.value)
         case o.value
         when '++'
-          orig.value = number.value + 1
+          ref.value = number + 1
         when '--'
-          orig.value = number.value - 1
+          ref.value = number - 1
         end
-        orig
+        ref.value
       end
 
       ## 11.4.6 Unary + Operator
@@ -169,78 +170,71 @@ module RKelly
       def visit_UnaryMinusNode(o)
         orig = o.value.accept(self)
         v = to_number(orig)
-        v.value = v.value == 0 ? -0.0 : 0 - v.value
-        v
+        (v == 0) ? -0.0 : 0 - v
       end
 
       ## 11.4.8 Binary NOT Operator (~)
       def visit_BitwiseNotNode(o)
         orig = o.value.accept(self)
-        number = to_int_32(orig)
-        VALUE[~number.value]
+        ~to_int_32(orig)
       end
 
       ## 11.4.9 Logical NOT Operator (!)
       def visit_LogicalNotNode(o)
-        bool = to_boolean(o.value.accept(self))
-        bool.value = !bool.value
-        bool
+        !to_boolean(o.value.accept(self))
       end
 
       ## 11.5 Multiplicative Operators
 
       def visit_MultiplyNode(o)
-        left = to_number(o.left.accept(self)).value
-        right = to_number(o.value.accept(self)).value
-        return_val =
-          if nan?(left) || nan?(right)
+        left = to_number(o.left.accept(self))
+        right = to_number(o.value.accept(self))
+
+        if nan?(left) || nan?(right)
+          NAN
+        else
+          if (infinite?(left) || infinite?(right)) && (left == 0 || right == 0)
             NAN
           else
-            if (infinite?(left) || infinite?(right)) && (left == 0 || right == 0)
-              NAN
-            else
-              left * right
-            end
+            left * right
           end
-        VALUE[return_val]
+        end
       end
 
       def visit_DivideNode(o)
-        left = to_number(o.left.accept(self)).value
-        right = to_number(o.value.accept(self)).value
-        return_val =
-          if nan?(left) || nan?(right)
-            NAN
-          elsif infinite?(left) && infinite?(right)
-            NAN
-          elsif left == 0 && right == 0
-            NAN
-          elsif right == 0
-            left * (right.eql?(0) ? (1.0/0.0) : (-1.0/0.0))
-          else
-            left / right
-          end
-        VALUE[return_val]
+        left = to_number(o.left.accept(self))
+        right = to_number(o.value.accept(self))
+
+        if nan?(left) || nan?(right)
+          NAN
+        elsif infinite?(left) && infinite?(right)
+          NAN
+        elsif left == 0 && right == 0
+          NAN
+        elsif right == 0
+          left * (right.eql?(0) ? (1.0/0.0) : (-1.0/0.0))
+        else
+          left / right
+        end
       end
 
       def visit_ModulusNode(o)
-        left = to_number(o.left.accept(self)).value
-        right = to_number(o.value.accept(self)).value
-        return_val =
-          if nan?(left) || nan?(right)
-            NAN
-          elsif infinite?(left) && infinite?(right)
-            NAN
-          elsif right == 0
-            NAN
-          elsif infinite?(left)
-            NAN
-          elsif infinite?(right)
-            left
-          else
-            left % right
-          end
-        VALUE[return_val]
+        left = to_number(o.left.accept(self))
+        right = to_number(o.value.accept(self))
+
+        if nan?(left) || nan?(right)
+          NAN
+        elsif infinite?(left) && infinite?(right)
+          NAN
+        elsif right == 0
+          NAN
+        elsif infinite?(left)
+          NAN
+        elsif infinite?(right)
+          left
+        else
+          left % right
+        end
       end
 
       ## 11.6 Additive Operators
@@ -249,15 +243,15 @@ module RKelly
         left  = to_primitive(o.left.accept(self), 'Number')
         right = to_primitive(o.value.accept(self), 'Number')
 
-        if left.value.is_a?(::String) || right.value.is_a?(::String)
-          VALUE["#{left.value}#{right.value}"]
+        if left.is_a?(::String) || right.is_a?(::String)
+          "#{left}#{right}"
         else
           additive_operator(:+, left, right)
         end
       end
 
       def visit_SubtractNode(o)
-        VALUE[o.left.accept(self).value - o.value.accept(self).value]
+        o.left.accept(self) - o.value.accept(self)
       end
 
       ## 11.8 Relational Operators
@@ -284,37 +278,23 @@ module RKelly
         left = o.left.accept(self)
         right = o.value.accept(self)
 
-        VALUE[left.value == right.value]
+        left == right
       end
 
       ## 11.13 Assignment Operators
 
       def visit_AssignExprNode(o)
-        @environment[@operand.last].value = o.value.accept(self).value
+        @environment[@operand.last] = o.value.accept(self)
       end
 
       def visit_OpEqualNode(o)
-        right = o.value.accept(self)
-
-        if o.left.is_a?(Nodes::DotAccessorNode)
-          obj = o.left.value.accept(self)
-          key = o.left.accessor
-          obj.value[key] = right
-          right
-        elsif o.left.is_a?(Nodes::BracketAccessorNode)
-          obj = o.left.value.accept(self)
-          key = o.left.accessor.accept(self).value
-          obj.value[key] = right
-          right
-        else
-          left = o.left.accept(self)
-          left.value = right.value
-          left
-        end
+        ref = make_reference(o.left)
+        ref.value = o.value.accept(self)
       end
 
       def visit_OpPlusEqualNode(o)
-        o.left.accept(self).value += o.value.accept(self).value
+        ref = make_reference(o.left)
+        ref.value += o.value.accept(self)
       end
 
 
@@ -364,7 +344,7 @@ module RKelly
 
       ## 12.5 If Statement
       def visit_IfNode(o)
-        if to_boolean(o.conditions.accept(self)).value
+        if to_boolean(o.conditions.accept(self))
           o.value.accept(self)
         elsif o.else
           o.else.accept(self)
@@ -389,7 +369,7 @@ module RKelly
           elsif c.abrupt?
             return c
           end
-        end while to_boolean(o.value.accept(self)).value
+        end while to_boolean(o.value.accept(self))
 
         COMPLETION[:normal, final_value]
       end
@@ -397,7 +377,7 @@ module RKelly
       def visit_WhileNode(o)
         final_value = nil
 
-        while to_boolean(o.left.accept(self)).value
+        while to_boolean(o.left.accept(self))
           c = o.value.accept(self)
 
           final_value = c.value if c.value
@@ -418,7 +398,7 @@ module RKelly
         final_value = nil
         o.init.accept(self) if o.init
 
-        while (!o.test || to_boolean(o.test.accept(self)).value)
+        while (!o.test || to_boolean(o.test.accept(self)))
           c = o.value.accept(self)
 
           final_value = c.value if c.value
@@ -449,7 +429,7 @@ module RKelly
 
       ## 12.9 The 'return' Statement
       def visit_ReturnNode(o)
-        COMPLETION[:return, o.value ? o.value.accept(self) : VALUE[:undefined]]
+        COMPLETION[:return, o.value ? o.value.accept(self) : :undefined]
       end
 
 
@@ -460,7 +440,7 @@ module RKelly
       end
 
       def visit_FunctionExprNode(o)
-        VALUE[RKelly::JS::Function.new(o.function_body, o.arguments, @environment)]
+        RKelly::JS::Function.new(o.function_body, o.arguments, @environment)
       end
 
       def visit_FunctionBodyNode(o)
@@ -468,7 +448,7 @@ module RKelly
         if c.type == :return && c.value
           c.value
         else
-          VALUE[:undefined]
+          :undefined
         end
       end
 
@@ -499,92 +479,88 @@ module RKelly
       end
 
       private
-      def to_number(object)
-        return VALUE[0] unless object.value
 
-        return_val =
-          case object.value
-          when :undefined
-            NAN
-          when false
+      def to_number(value)
+        return 0 unless value
+
+        case value
+        when :undefined
+          NAN
+        when false
+          0
+        when true
+          1
+        when Numeric
+          value
+        when ::String
+          s = value.gsub(/(\A[\s\xA0]*|[\s\xA0]*\Z)/n, '')
+          if s.length == 0
             0
-          when true
-            1
-          when Numeric
-            object.value
-          when ::String
-            s = object.value.gsub(/(\A[\s\xA0]*|[\s\xA0]*\Z)/n, '')
-            if s.length == 0
-              0
+          else
+            case s
+            when /^([+-])?Infinity/
+              $1 == '-' ? -1.0/0.0 : 1.0/0.0
+            when /\A[-+]?\d+\.\d*(?:[eE][-+]?\d+)?$|\A[-+]?\d+(?:\.\d*)?[eE][-+]?\d+$|\A[-+]?\.\d+(?:[eE][-+]?\d+)?$/, /\A[-+]?0[xX][\da-fA-F]+$|\A[+-]?0[0-7]*$|\A[+-]?\d+$/
+              s.gsub!(/\.(\D)/, '.0\1') if s =~ /\.\w/
+              s.gsub!(/\.$/, '.0') if s =~ /\.$/
+              s.gsub!(/^\./, '0.') if s =~ /^\./
+              s.gsub!(/^([+-])\./, '\10.') if s =~ /^[+-]\./
+              s = s.gsub(/^[0]*/, '') if /^0[1-9]+$/.match(s)
+              eval(s)
             else
-              case s
-              when /^([+-])?Infinity/
-                $1 == '-' ? -1.0/0.0 : 1.0/0.0
-              when /\A[-+]?\d+\.\d*(?:[eE][-+]?\d+)?$|\A[-+]?\d+(?:\.\d*)?[eE][-+]?\d+$|\A[-+]?\.\d+(?:[eE][-+]?\d+)?$/, /\A[-+]?0[xX][\da-fA-F]+$|\A[+-]?0[0-7]*$|\A[+-]?\d+$/
-                s.gsub!(/\.(\D)/, '.0\1') if s =~ /\.\w/
-                s.gsub!(/\.$/, '.0') if s =~ /\.$/
-                s.gsub!(/^\./, '0.') if s =~ /^\./
-                s.gsub!(/^([+-])\./, '\10.') if s =~ /^[+-]\./
-                s = s.gsub(/^[0]*/, '') if /^0[1-9]+$/.match(s)
-                eval(s)
-              else
-                NAN
-              end
+              NAN
             end
-          when RKelly::JS::Base
-            return to_number(to_primitive(object, 'Number'))
           end
-        VALUE[return_val]
+        when RKelly::JS::Base
+          return to_number(to_primitive(value, 'Number'))
+        end
       end
 
-      def to_boolean(object)
-        return VALUE[false] unless object.value
-        value = object.value
-        boolean =
-          case value
-          when :undefined
-            false
-          when true
-            true
-          when Numeric
-            value == 0 || nan?(value) ? false : true
-          when ::String
-            value.length == 0 ? false : true
-          when RKelly::JS::Base
-            true
-          else
-            raise
-          end
-        VALUE[boolean]
+      def to_boolean(value)
+        return false unless value
+
+        case value
+        when :undefined
+          false
+        when true
+          true
+        when Numeric
+          value == 0 || nan?(value) ? false : true
+        when ::String
+          value.length == 0 ? false : true
+        when RKelly::JS::Base
+          true
+        else
+          raise
+        end
       end
 
       def to_int_32(object)
-        number = to_number(object)
-        value = number.value
-        return number if value == 0
-        if nan?(value) || infinite?(value)
-          VALUE[0]
-        end
+        value = to_number(object)
+        return 0 if value == 0 || nan?(value) || infinite?(value)
+
         value = ((value < 0 ? -1 : 1) * value.abs.floor) % (2 ** 32)
+
         if value >= 2 ** 31
-          VALUE[value - (2 ** 32)]
+          value - (2 ** 32)
         else
-          VALUE[value]
+          value
         end
       end
 
-      def to_primitive(object, preferred_type = nil)
-        return object unless object.value
-        case object.value
+      def to_primitive(value, preferred_type = nil)
+        return value unless value
+
+        case value
         when false, true, :undefined, ::String, Numeric
-          VALUE[object.value]
+          value
         when RKelly::JS::Base
-          call_function(object.value.default_value(preferred_type))
+          call_function(value.default_value(preferred_type))
         end
       end
 
       def additive_operator(operator, left, right)
-        left, right = to_number(left).value, to_number(right).value
+        left, right = to_number(left), to_number(right)
 
         left = nan?(left) ? 0.0/0.0 : left
         right = nan?(right) ? 0.0/0.0 : right
@@ -592,13 +568,11 @@ module RKelly
         result = left.send(operator, right)
         result = nan?(result) ? NAN : result
 
-        VALUE[result]
+        result
       end
 
-      def call_function(property, arguments = [])
-        function = property.value
-        this = property.binder || @environment.global_object
-
+      def call_function(function, this=nil, arguments = [])
+        this = this || @environment.global_object
         function.call(this, *arguments)
       end
 
@@ -611,18 +585,23 @@ module RKelly
         left = to_primitive(o.left.accept(self), "Number")
         right = to_primitive(o.value.accept(self), "Number")
 
-        if [left, right].all? {|x| x.value.is_a?(::String) }
-          VALUE[yield(left.value, right.value)]
+        if left.is_a?(::String) && right.is_a?(::String)
+          yield(left, right)
         else
-          left = to_number(left).value
-          right = to_number(right).value
+          left = to_number(left)
+          right = to_number(right)
 
           if nan?(left) || nan?(right)
-            VALUE[false]
+            false
           else
-            VALUE[yield(left, right)]
+            yield(left, right)
           end
         end
+      end
+
+      # Wraps syntax node inside Reference object.
+      def make_reference(node)
+        Runtime::Reference.new(node, @environment, self)
       end
 
       # Helper to check if x is NaN.

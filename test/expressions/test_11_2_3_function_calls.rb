@@ -37,6 +37,15 @@ class Expressions_11_2_3_Function_Calls_Test < ExecuteTestCase
     EOJS
   end
 
+  def test_return_param
+    assert_execute({ 'x' => 5 }, <<-EOJS)
+      function foo(n) {
+        return n;
+      }
+      var x = foo(5);
+    EOJS
+  end
+
   def test_recursion
     assert_execute({ 'x' => 120 }, <<-EOJS)
       function factorial(n) {

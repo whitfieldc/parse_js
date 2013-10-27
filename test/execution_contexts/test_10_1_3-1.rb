@@ -12,8 +12,7 @@ class ExecutionContext_10_1_3_1_Test < Test::Unit::TestCase
         }
         var x = myfun3(2,4);
     EOJS
-    assert env['x']
-    assert_equal :undefined, env['x'].value
+    assert_equal :undefined, env['x']
   end
 
   def test_myfun3
@@ -23,7 +22,6 @@ class ExecutionContext_10_1_3_1_Test < Test::Unit::TestCase
         }
         var x = myfun3(2,4,8);
     EOJS
-    assert env['x']
-    assert_equal 8, env['x'].value
+    assert_equal 8, env['x']
   end
 end

@@ -6,8 +6,7 @@ module RKelly
       def initialize(function)
         super()
         @class_name = 'Object'
-        self['constructor'] = VALUE[function]
-        self['arguments'].value = nil
+        self['constructor'] = function
       end
     end
   end

@@ -26,8 +26,7 @@ module RKelly
         @arguments = arguments
         @outer_environment = outer_environment
         @prototype = JS::FunctionPrototype.new(self)
-        self['toString'] = VALUE[:undefined]
-        self['length'] = VALUE[arguments.length]
+        self['length'] = arguments.length
       end
 
       def call(this, *params)
@@ -35,7 +34,7 @@ module RKelly
         env.this = this
 
         @arguments.each_with_index { |name, i|
-          env.record[name.value] = params[i] || RKelly::Runtime::UNDEFINED
+          env.record[name.value] = params[i] || :undefined
         }
 
         @body.accept(RKelly::Visitors::FunctionVisitor.new(env))

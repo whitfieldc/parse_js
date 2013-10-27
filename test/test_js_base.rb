@@ -12,7 +12,7 @@ class JsBaseTest < Test::Unit::TestCase
   end
 
   def test_get_missing_key
-    assert_equal :undefined, @obj["blah"].value
+    assert_equal :undefined, @obj["blah"]
   end
 
   def test_get_existing_key

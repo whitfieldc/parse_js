@@ -10,9 +10,6 @@ class GlobalObject_15_1_1_1_Test < ECMAScriptTestCase
 
   def test_nan
     assert @object.has_property?('NaN')
-    assert @object['NaN'].dont_enum?
-    assert @object['NaN'].dont_delete?
-    assert @object['NaN'].value.nan?
   end
 
   def test_global_nan

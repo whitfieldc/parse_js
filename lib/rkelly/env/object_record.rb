@@ -5,7 +5,7 @@ module RKelly
     #
     # To create an uninitialized binding, simply assign :undefined:
     #
-    #   env_record[var_name] = VALUE[:undefined]
+    #   env_record[var_name] = :undefined
     #
     class ObjectRecord
       attr_reader :obj

@@ -3,8 +3,6 @@ require 'rkelly/env/lexical'
 
 module RKelly
   class Runtime
-    UNDEFINED = RKelly::JS::Property.new(:undefined, :undefined)
-    VALUE = RKelly::JS::VALUE
 
     def initialize
       @parser = Parser.new
@@ -22,13 +20,13 @@ module RKelly
     end
 
     def call_function(function_name, *args)
-      function = @env[function_name].value
+      function = @env[function_name]
       this = @env.global_object
-      function.call(this, *(args.map {|x| VALUE[x] }) ).value
+      function.call(this, *args)
     end
 
     def define_function(name, &block)
-      @env.record[name.to_s] = VALUE[JS::RubyFunction.new(&block)]
+      @env.record[name.to_s] = JS::RubyFunction.new(&block)
     end
   end
 end

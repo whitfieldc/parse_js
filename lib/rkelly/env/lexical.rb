@@ -1,7 +1,6 @@
 require 'rkelly/env/declarative_record'
 require 'rkelly/env/object_record'
 require 'rkelly/js/global_object'
-require 'rkelly/js/value'
 
 module RKelly
   module Env
@@ -25,7 +24,7 @@ module RKelly
         if outer && outer.global_object
           @global_object = outer.global_object
         else
-          @global_object = JS::VALUE[record.obj]
+          @global_object = record.obj
         end
 
         @this = @global_object
@@ -46,13 +45,23 @@ module RKelly
         Env::Lexical.new(self, Env::ObjectRecord.new(obj))
       end
 
-      # Retrieves the variable (Property object) from this or one of
-      # the outer environments.
+      # Retrieves the variable value from this or one of the outer
+      # environments.
       def [](name)
         if @record.has_binding?(name)
           @record[name]
         elsif @outer
           @outer[name]
+        end
+      end
+
+      # Sets the variable value in this or one of the outer
+      # environments.
+      def []=(name, value)
+        if @record.has_binding?(name)
+          @record[name] = value
+        elsif @outer
+          @outer[name] = value
         end
       end
 

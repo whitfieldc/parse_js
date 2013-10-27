@@ -5,7 +5,7 @@ module RKelly
       attr_accessor :prototype
       def initialize
         @properties = Hash.new { |h,k|
-          h[k] = VALUE[:undefined]
+          h[k] = :undefined
         }
         @value = self
         # The [[Class]] internal property from ECMASCript spec.
@@ -18,22 +18,22 @@ module RKelly
         if @prototype
           @prototype[name]
         else
-          VALUE[:undefined]
+          :undefined
         end
       end
 
       def []=(name, value)
-        return unless can_put?(name)
+        # return unless can_put?(name)
         @properties[name] = value
       end
 
-      def can_put?(name)
-        if !has_property?(name)
-          return true if @prototype.nil?
-          return @prototype.can_put?(name)
-        end
-        !@properties[name].read_only?
-      end
+      # def can_put?(name)
+      #   if !has_property?(name)
+      #     return true if @prototype.nil?
+      #     return @prototype.can_put?(name)
+      #   end
+      #   !@properties[name].read_only?
+      # end
 
       def has_property?(name)
         return true if @properties.has_key?(name)
@@ -43,7 +43,7 @@ module RKelly
 
       def delete(name)
         return true unless has_property?(name)
-        return false if @properties[name].dont_delete?
+        # return false if @properties[name].dont_delete?
         @properties.delete(name)
         true
       end
@@ -52,11 +52,11 @@ module RKelly
         case hint
         when 'Number'
           value_of = self['valueOf']
-          if value_of.function || value_of.value.is_a?(RKelly::JS::Function)
+          if value_of.is_a?(RKelly::JS::Function)
             return value_of
           end
           to_string = self['toString']
-          if to_string.function || to_string.value.is_a?(RKelly::JS::Function)
+          if to_string.is_a?(RKelly::JS::Function)
             return to_string
           end
         end

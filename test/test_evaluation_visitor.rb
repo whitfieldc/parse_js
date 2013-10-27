@@ -13,7 +13,7 @@ class EvaluationVisitorTest < Test::Unit::TestCase
     @fun_visitor.accept(tree)
     @eval_visitor.accept(tree)
     actual.each do |property, value|
-      assert_equal value, @env[property].value
+      assert_equal value, @env[property]
     end
   end
 

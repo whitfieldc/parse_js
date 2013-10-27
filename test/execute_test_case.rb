@@ -8,8 +8,7 @@ class ExecuteTestCase < Test::Unit::TestCase
   def assert_execute(expected, code)
     env = @runtime.execute(code)
     expected.each do |name, value|
-      assert env[name]
-      assert_equal value, env[name].value
+      assert_equal value, env[name]
     end
   end
 end

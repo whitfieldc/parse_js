@@ -5,9 +5,9 @@ module RKelly
     class ObjectPrototype < Base
       def initialize
         super
-        self['toString'] = VALUE[RubyFunction.new do |this, *args|
-            "[object #{this.class_name}]"
-        end]
+        self['toString'] = RubyFunction.new do |this, *args|
+          "[object #{this.class_name}]"
+        end
       end
     end
   end
