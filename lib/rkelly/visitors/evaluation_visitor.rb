@@ -65,6 +65,13 @@ module RKelly
         right
       end
 
+      def visit_BracketAccessorNode(o)
+        left = o.value.accept(self)
+        right = left.value[o.accessor.accept(self).value]
+        right.binder = left.value
+        right
+      end
+
       ## 11.2.2 The 'new' Operator
       def visit_NewExprNode(o)
         fn = o.value.accept(self)
@@ -284,6 +291,11 @@ module RKelly
           key = o.left.accessor
           obj.value[key] = right
           right
+        elsif o.left.is_a?(Nodes::BracketAccessorNode)
+          obj = o.left.value.accept(self)
+          key = o.left.accessor.accept(self).value
+          obj.value[key] = right
+          right
         else
           left = o.left.accept(self)
           left.value = right.value
@@ -453,7 +465,7 @@ module RKelly
 
       %w{
         ArrayNode BitAndNode BitOrNode
-        BitXOrNode BracketAccessorNode
+        BitXOrNode
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
         ConstStatementNode DeleteNode
         ElementNode
