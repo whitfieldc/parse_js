@@ -309,7 +309,6 @@ module RKelly
         else
           left = o.left.accept(self)
           left.value = right.value
-          left.function = right.function
           left
         end
       end
@@ -597,16 +596,10 @@ module RKelly
       end
 
       def call_function(property, arguments = [])
-        function  = property.function || property.value
+        function = property.value
         this = property.binder || @environment.global_object
-        case function
-        when JS::Function, JS::RubyFunction
-          function.call(this, *arguments)
-        when UnboundMethod
-          VALUE[function.bind(property.binder).call(*(arguments.map { |x| x.value}))]
-        else
-          VALUE[function.call(*(arguments.map { |x| x.value }))]
-        end
+
+        function.call(this, *arguments)
       end
 
       # 11.8.5 The Abstract Relational Comparison Algorithm
