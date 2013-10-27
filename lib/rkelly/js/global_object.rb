@@ -21,9 +21,6 @@ module RKelly
         self['Object'].value['prototype'] = VALUE[JS::ObjectPrototype.new]
 
         self['Number'] = VALUE[JS::Number.new]
-        self['Number'].function = lambda { |*args|
-          JS::Number.create(*args)
-        }
 
         self['String'] = VALUE[JS::String.new('')]
         self['String'].function = lambda { |*args|
