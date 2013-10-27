@@ -37,9 +37,9 @@ class Expressions_11_4_9_Logical_Not_Test < ECMAScriptTestCase
     js_assert_equal("false", "!(-Infinity)")
   end
 
-  # def test_math_pi
-  #   js_assert_equal("false", "!(Math.PI)")
-  # end
+  def test_math_pi
+    js_assert_equal("false", "!(Math.PI)")
+  end
 
   def test_1
     js_assert_equal("false", "!(1)")

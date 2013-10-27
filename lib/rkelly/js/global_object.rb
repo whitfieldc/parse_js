@@ -23,6 +23,8 @@ module RKelly
         self['Number'] = VALUE[JS::Number.new]
 
         self['String'] = VALUE[JS::String.new]
+
+        self['Math'] = VALUE[JS::Math.new]
       end
     end
   end
