@@ -277,11 +277,19 @@ module RKelly
       end
 
       def visit_OpEqualNode(o)
-        left = o.left.accept(self)
         right = o.value.accept(self)
-        left.value = right.value
-        left.function = right.function
-        left
+
+        if o.left.is_a?(Nodes::DotAccessorNode)
+          obj = o.left.value.accept(self)
+          key = o.left.accessor
+          obj.value[key] = right
+          right
+        else
+          left = o.left.accept(self)
+          left.value = right.value
+          left.function = right.function
+          left
+        end
       end
 
       def visit_OpPlusEqualNode(o)
