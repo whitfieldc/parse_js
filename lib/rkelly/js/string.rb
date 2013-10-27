@@ -9,9 +9,9 @@ module RKelly
 
       def initialize()
         super()
-        self['fromCharCode'] = VALUE[unbound_method(:fromCharCode) { |*args|
-          args.map { |x| x.chr }.join
-        }]
+        self['fromCharCode'] = VALUE[RubyFunction.new do |this, *args|
+            args.map { |x| x.chr }.join
+        end]
       end
     end
   end
