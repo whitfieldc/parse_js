@@ -22,10 +22,7 @@ module RKelly
 
         self['Number'] = VALUE[JS::Number.new]
 
-        self['String'] = VALUE[JS::String.new('')]
-        self['String'].function = lambda { |*args|
-          JS::String.create(*args)
-        }
+        self['String'] = VALUE[JS::String.new]
       end
     end
   end

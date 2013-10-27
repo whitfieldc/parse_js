@@ -7,11 +7,8 @@ module RKelly
         end
       end
 
-      def initialize(value)
+      def initialize()
         super()
-        self['valueOf'] = VALUE[value]
-        self['valueOf'].function = lambda { value }
-        self['toString'] = VALUE[value]
         self['fromCharCode'] = VALUE[unbound_method(:fromCharCode) { |*args|
           args.map { |x| x.chr }.join
         }]
