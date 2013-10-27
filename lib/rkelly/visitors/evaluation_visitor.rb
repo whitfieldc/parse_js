@@ -55,6 +55,16 @@ module RKelly
         VALUE[o.value]
       end
 
+      ## 11.1.5 Object Initialiser
+
+      def visit_ObjectLiteralNode(o)
+        obj = @environment["Object"].value.construct().value
+        o.value.each do |prop|
+          obj[prop.name] = prop.value.accept(self)
+        end
+        VALUE[obj]
+      end
+
       ## 11.2 Left-Hand-Side Expressions
 
       ## 11.2.1 Property Accessors
@@ -474,11 +484,11 @@ module RKelly
         InNode InstanceOfNode LabelNode LeftShiftNode
         LogicalAndNode LogicalOrNode
         NotEqualNode NotStrictEqualNode
-        ObjectLiteralNode OpAndEqualNode OpDivideEqualNode
+        OpAndEqualNode OpDivideEqualNode
         OpLShiftEqualNode OpMinusEqualNode OpModEqualNode
         OpMultiplyEqualNode OpOrEqualNode OpRShiftEqualNode
         OpURShiftEqualNode OpXOrEqualNode ParameterNode
-        PropertyNode RegexpNode RightShiftNode
+        RegexpNode RightShiftNode
         SetterPropertyNode StrictEqualNode
         SwitchNode ThrowNode TryNode
         UnsignedRightShiftNode
