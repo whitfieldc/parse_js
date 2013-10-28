@@ -50,6 +50,14 @@ module RKelly
         end
       end
 
+      def delete!
+        if bound_to_object?
+          @binder.delete(@key)
+        else
+          false
+        end
+      end
+
     end
   end
 end

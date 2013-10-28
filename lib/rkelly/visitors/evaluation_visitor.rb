@@ -117,6 +117,12 @@ module RKelly
 
       ## 11.4 Unary Operators
 
+      ## 11.4.1 The 'delete' Operator
+      def visit_DeleteNode(o)
+        ref = make_reference(o.value)
+        ref.delete!
+      end
+
       ## 11.4.2 The 'void' Operator
       def visit_VoidNode(o)
         o.value.accept(self)
@@ -451,7 +457,7 @@ module RKelly
         ArrayNode BitAndNode BitOrNode
         BitXOrNode
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
-        ConstStatementNode DeleteNode
+        ConstStatementNode
         ElementNode
         ForInNode
         GetterPropertyNode
