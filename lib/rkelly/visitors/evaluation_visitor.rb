@@ -15,7 +15,6 @@ module RKelly
       def initialize(environment)
         super()
         @environment = environment
-        @operand = []
       end
 
       ## 11 Expressions
@@ -283,10 +282,6 @@ module RKelly
 
       ## 11.13 Assignment Operators
 
-      def visit_AssignExprNode(o)
-        @environment[@operand.last] = o.value.accept(self)
-      end
-
       def visit_OpEqualNode(o)
         ref = make_reference(o.left)
         ref.value = o.value.accept(self)
@@ -326,9 +321,9 @@ module RKelly
       end
 
       def visit_VarDeclNode(o)
-        @operand << o.name
-        o.value.accept(self) if o.value
-        @operand.pop
+        return unless o.value
+        # Handling also the AssignExprNode
+        @environment[o.name] = o.value.value.accept(self)
       end
 
       ## 12.3 Empty Statement
