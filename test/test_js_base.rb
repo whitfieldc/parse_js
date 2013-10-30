@@ -39,4 +39,20 @@ class JsBaseTest < Test::Unit::TestCase
     @proto["baz"] = true
     assert_equal true, @obj["baz"]
   end
+
+  def test_delete_in_obj
+    @obj.delete("foo")
+    assert_equal :undefined, @obj["foo"]
+  end
+
+  def test_delete_in_prototype_reflects_in_obj
+    @proto.delete("bar")
+    assert_equal :undefined, @obj["bar"]
+  end
+
+  def test_delete_in_obj_does_not_effect_prototype
+    @obj.delete("bar")
+    assert_equal 42, @obj["bar"]
+  end
+
 end
