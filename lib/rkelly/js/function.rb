@@ -25,8 +25,12 @@ module RKelly
         @body = body || Nodes::FunctionBodyNode.new(Nodes::SourceElementsNode.new([]))
         @arguments = arguments
         @outer_environment = outer_environment
-        @prototype = JS::FunctionPrototype.new(self)
+        @class_name = 'Function'
+        self['prototype'] = JS::Base.new
+        self['prototype'].prototype = JS::ObjectPrototype.new
+        self['prototype']['constructor'] = self
         self['length'] = arguments.length
+        self['arguments'] = nil
       end
 
       def call(this, *params)

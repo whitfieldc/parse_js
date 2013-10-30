@@ -12,7 +12,7 @@ module RKelly
         end
 
         res = call(this, *args)
-        if res.respond_to?(:class_name) && res.class_name == "Object"
+        if res.respond_to?(:class_name)
           return res
         else
           return this

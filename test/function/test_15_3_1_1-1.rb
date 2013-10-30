@@ -1,15 +1,12 @@
 require File.dirname(__FILE__) + "/../helper"
 
-class Functions_15_3_1_1_1_Test # Disabled < ECMAScriptTestCase
+class Functions_15_3_1_1_1_Test < ECMAScriptTestCase
   def setup
     super
-    @runtime.execute(<<END
-var MyObject = Function( "value", "this.value = value; this.valueOf =  Function( 'return this.value' ); this.toString =  Function( 'return String(this.value
-);' )" );
-var myfunc = Function();
-myfunc.toString = Object.prototype.toString;
-END
-                    )
+    @runtime.execute(<<-END)
+      var myfunc = Function();
+      myfunc.toString = Object.prototype.toString;
+    END
   end
 
   def test_to_string
