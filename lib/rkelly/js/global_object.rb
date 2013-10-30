@@ -14,6 +14,12 @@ module RKelly
         self['Object'] = JS::RubyFunction.new
         self['Object']['prototype'] = JS::ObjectPrototype.new
 
+        self['Function'] = JS::RubyFunction.new do |this, *args|
+          JS::Function.create(*args)
+        end
+        self['Function']['prototype'] = JS::FunctionPrototype.new(self['Function'])
+        self['Function']['prototype'].prototype = self['Object']['prototype']
+
         self['Number'] = JS::Number.new
 
         self['String'] = JS::String.new

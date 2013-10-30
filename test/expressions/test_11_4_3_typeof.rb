@@ -58,19 +58,19 @@ class Typeof_11_4_3_Typeof_Test < ExecuteTestCase
     assert_execute({ 'x' => 'function' }, "var x = typeof(function(){});")
   end
 
+  def test_typeof_newFunction_call
+    assert_execute({ 'x' => 'function' }, "var x = typeof(new Function());")
+  end
+
+  def disabled_test_typeof_Function_prototype
+    assert_execute({ 'x' => 'object' }, "var x = typeof(Function.prototype);")
+  end
+
   # Disabled:
-
-  # def test_typeof_newFunction_call
-  #   assert_execute({ 'x' => 'function' }, "var x = typeof(new Function());")
-  # end
-
-  # def disabled_test_typeof_Function_prototype
-  #   assert_execute({ 'x' => 'object' }, "var x = typeof(Function.prototype);")
-  # end
 
   # All builtin type constructors are of 'function' type.
   # %w[Function Array Object Boolean].each do |type|
-  %w[Object].each do |type|
+  %w[Object Function].each do |type|
     define_method(:"test_typof_#{type}_constructor") do
       assert_execute({ 'x' => 'function' }, "var x = typeof(#{type});")
     end
