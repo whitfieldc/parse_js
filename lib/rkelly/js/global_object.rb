@@ -11,10 +11,10 @@ module RKelly
 
         self['undefined'] = :undefined
 
-        self['Object'] = JS::RubyFunction.new
+        self['Object'] = JS::Function.new
         self['Object']['prototype'] = JS::ObjectPrototype.new
 
-        self['Function'] = JS::RubyFunction.new do |this, *args|
+        self['Function'] = JS::Function.new do |this, *args|
           JS::Function.create(*args)
         end
         self['Function']['prototype'] = JS::FunctionPrototype.new(self['Function'])
