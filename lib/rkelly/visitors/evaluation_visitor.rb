@@ -1,4 +1,6 @@
-require 'rkelly/js'
+require 'rkelly/js/base'
+require 'rkelly/js/nan'
+require 'rkelly/js/function'
 require 'rkelly/runtime/completion'
 require 'rkelly/runtime/reference'
 

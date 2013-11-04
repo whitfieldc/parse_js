@@ -1,4 +1,4 @@
-require 'rkelly/js'
+require 'rkelly/js/function'
 
 module RKelly
   module Visitors

@@ -1,4 +1,4 @@
-require 'rkelly/js'
+require 'rkelly/js/function'
 require 'rkelly/env/lexical'
 
 module RKelly
