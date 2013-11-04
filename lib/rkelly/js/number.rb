@@ -1,3 +1,6 @@
+require 'rkelly/js/base'
+require 'rkelly/js/nan'
+
 module RKelly
   module JS
     class Number < Base

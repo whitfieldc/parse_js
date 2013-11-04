@@ -1,3 +1,6 @@
+require 'rkelly/js/base'
+require 'rkelly/js/function'
+
 module RKelly
   module JS
     # This is the object protytpe
