@@ -15,21 +15,22 @@ module RKelly
         end
       end
 
-      # Creates new function object.
+      # Creates new function object (with reference to the lexical
+      # environment in which it was created).
       #
       # For internal functions, a &block is given with Ruby code to execute.
       # For true JS functions, body and arguments are passed instead.
-      def initialize(outer_environment, body=nil, arguments = [], &block)
+      def initialize(env, body=nil, arguments = [], &block)
         super()
         @body = body
         @block = block
         @arguments = arguments
-        @outer_environment = outer_environment
+        @env = env
         @class_name = 'Function'
 
         self['prototype'] = JS::Base.new
         self['prototype']['constructor'] = self
-        self['prototype'].prototype = @outer_environment.object_prototype
+        self['prototype'].prototype = @env.object_prototype
         self['length'] = @arguments.length
         self['arguments'] = nil
       end
@@ -41,7 +42,7 @@ module RKelly
         if has_property?('prototype')
           this.prototype = self['prototype']
         else
-          this.prototype = @outer_environment.object_prototype
+          this.prototype = @env.object_prototype
         end
 
         res = call(this, *args)
@@ -66,15 +67,15 @@ module RKelly
       def js_call(this, *params)
         return :undefined unless @body
 
-        env = @outer_environment.new_declarative
-        env.this = this
+        new_env = @env.new_declarative
+        new_env.this = this
 
         @arguments.each_with_index { |name, i|
-          env.record[name.value] = params[i] || :undefined
+          new_env.record[name.value] = params[i] || :undefined
         }
 
-        @body.accept(RKelly::Visitors::FunctionVisitor.new(env))
-        @body.accept(RKelly::Visitors::EvaluationVisitor.new(env))
+        @body.accept(RKelly::Visitors::FunctionVisitor.new(new_env))
+        @body.accept(RKelly::Visitors::EvaluationVisitor.new(new_env))
       end
 
 
