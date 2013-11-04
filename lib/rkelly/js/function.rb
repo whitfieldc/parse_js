@@ -1,16 +1,29 @@
+require 'rkelly/js/base'
+require 'rkelly/js/function_prototype'
+
 module RKelly
   module JS
     class Function < Base
       class << self
+        # Initializes the global Function object.
+        def define(env)
+          function = JS::Function.new(env) do |this, *args|
+            create(env, *args)
+          end
+          function['prototype'] = JS::FunctionPrototype.new(function)
+          function['prototype'].prototype = env.object_prototype
+          function
+        end
+
         def create(env, *args)
           if args.length > 0
             parser = RKelly::Parser.new
             body = args.pop
             tree = parser.parse("function x(#{args.join(',')}) { #{body} }")
             func = tree.value.first
-            self.new(env, func.function_body, func.arguments)
+            JS::Function.new(env, func.function_body, func.arguments)
           else
-            self.new(env)
+            JS::Function.new(env)
           end
         end
       end

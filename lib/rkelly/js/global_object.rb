@@ -24,11 +24,7 @@ module RKelly
         self['Object'] = JS::Function.new(env)
         self['Object']['prototype'] = @object_prototype
 
-        self['Function'] = JS::Function.new(env) do |this, *args|
-          JS::Function.create(env, *args)
-        end
-        self['Function']['prototype'] = JS::FunctionPrototype.new(self['Function'])
-        self['Function']['prototype'].prototype = @object_prototype
+        self['Function'] = JS::Function.define(env)
 
         self['Number'] = JS::Number.new
 
