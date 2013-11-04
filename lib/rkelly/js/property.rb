@@ -1,19 +1,25 @@
 module RKelly
   module JS
+    # A property of an object, containing the value and various
+    # attributes.  Used to represent a single property in JS::Base.
     class Property
-      attr_accessor :name, :value, :attributes, :binder
-      def initialize(name, value, binder = nil, attributes = [])
-        @name = name
-        @value = value
-        @binder = binder
+
+      def initialize(attributes = {})
         @attributes = attributes
       end
 
-      [:read_only, :dont_enum, :dont_delete, :internal].each do |property|
+      def value
+        @attributes[:value]
+      end
+
+      # All attributes default to `true`, unless explicitly set to
+      # `false`.
+      [:writable, :enumerable, :configurable].each do |property|
         define_method(:"#{property}?") do
-          self.attributes.include?(property)
+          !(@attributes[property] == false)
         end
       end
+
     end
   end
 end

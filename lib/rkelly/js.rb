@@ -1,5 +1,4 @@
 require 'rkelly/js/nan'
-require 'rkelly/js/property'
 require 'rkelly/js/base'
 require 'rkelly/js/global_object'
 require 'rkelly/js/object_prototype'

@@ -1,12 +1,12 @@
+require 'rkelly/js/property'
+
 module RKelly
   module JS
     class Base
       attr_reader :properties, :value, :class_name
       attr_accessor :prototype
       def initialize
-        @properties = Hash.new { |h,k|
-          h[k] = :undefined
-        }
+        @properties = {}
         @value = self
         # The [[Class]] internal property from ECMASCript spec.
         @class_name = "Object"
@@ -14,7 +14,8 @@ module RKelly
       end
 
       def [](name)
-        return @properties[name] if @properties.has_key?(name)
+        return @properties[name].value if has_own_property?(name)
+
         if @prototype
           @prototype[name]
         else
@@ -23,29 +24,49 @@ module RKelly
       end
 
       def []=(name, value)
-        # return unless can_put?(name)
-        @properties[name] = value
+        define_own_property(name, {:value => value})
       end
 
-      # def can_put?(name)
-      #   if !has_property?(name)
-      #     return true if @prototype.nil?
-      #     return @prototype.can_put?(name)
-      #   end
-      #   !@properties[name].read_only?
-      # end
+      def can_put?(name)
+        if !has_own_property?(name)
+          if @prototype
+            return @prototype.can_put?(name)
+          else
+            return true
+          end
+        end
+
+        @properties[name].writable?
+      end
 
       def has_property?(name)
-        return true if @properties.has_key?(name)
-        return false if @prototype.nil?
-        @prototype.has_property?(name)
+        return true if has_own_property?(name)
+
+        if @prototype
+          @prototype.has_property?(name)
+        else
+          false
+        end
       end
 
       def delete(name)
-        return true unless has_property?(name)
-        # return false if @properties[name].dont_delete?
-        @properties.delete(name)
-        true
+        return true unless has_own_property?(name)
+
+        if @properties[name].configurable?
+          @properties.delete(name)
+          true
+        else
+          false
+        end
+      end
+
+      def define_own_property(name, attributes)
+        return unless can_put?(name)
+        @properties[name] = Property.new(attributes)
+      end
+
+      def has_own_property?(name)
+        @properties.has_key?(name)
       end
 
       def default_value(hint)
