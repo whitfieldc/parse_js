@@ -8,7 +8,7 @@ module RKelly
     class ObjectPrototype < Base
       def initialize(env)
         super()
-        self['toString'] = Function.new(env) do |this, *args|
+        self['toString'] = JS::Function.new(env) do |this, *args|
           "[object #{this.class_name}]"
         end
       end

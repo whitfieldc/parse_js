@@ -17,7 +17,7 @@ module RKelly
 
         def create(env, *args)
           if args.length > 0
-            parser = RKelly::Parser.new
+            parser = Parser.new
             body = args.pop
             tree = parser.parse("function x(#{args.join(',')}) { #{body} }")
             func = tree.value.first
@@ -87,8 +87,8 @@ module RKelly
           new_env.record[name.value] = params[i] || :undefined
         }
 
-        @body.accept(RKelly::Visitors::FunctionVisitor.new(new_env))
-        @body.accept(RKelly::Visitors::EvaluationVisitor.new(new_env))
+        @body.accept(Visitors::FunctionVisitor.new(new_env))
+        @body.accept(Visitors::EvaluationVisitor.new(new_env))
       end
 
 

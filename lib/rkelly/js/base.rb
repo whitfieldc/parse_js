@@ -62,7 +62,7 @@ module RKelly
 
       def define_own_property(name, attributes)
         return unless can_put?(name)
-        @properties[name] = Property.new(attributes)
+        @properties[name] = JS::Property.new(attributes)
       end
 
       def has_own_property?(name)
@@ -73,11 +73,11 @@ module RKelly
         case hint
         when 'Number'
           value_of = self['valueOf']
-          if value_of.is_a?(RKelly::JS::Function)
+          if value_of.is_a?(JS::Function)
             return value_of
           end
           to_string = self['toString']
-          if to_string.is_a?(RKelly::JS::Function)
+          if to_string.is_a?(JS::Function)
             return to_string
           end
         end

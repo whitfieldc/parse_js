@@ -6,7 +6,7 @@ module RKelly
     class String < Base
       def initialize(env)
         super()
-        self['fromCharCode'] = Function.new(env) do |this, *args|
+        self['fromCharCode'] = JS::Function.new(env) do |this, *args|
           args.map { |x| x.chr }.join
         end
       end

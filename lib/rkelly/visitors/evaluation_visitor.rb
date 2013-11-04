@@ -9,10 +9,10 @@ module RKelly
     class EvaluationVisitor < Visitor
 
       # Shorthand for the completion object creator
-      COMPLETION = RKelly::Runtime::Completion
+      COMPLETION = Runtime::Completion
 
       # One shared NaN object
-      NAN = RKelly::JS::NaN.new
+      NAN = JS::NaN.new
 
       def initialize(environment)
         super()
@@ -443,7 +443,7 @@ module RKelly
       end
 
       def visit_FunctionExprNode(o)
-        RKelly::JS::Function.new(@environment, o.function_body, o.arguments)
+        JS::Function.new(@environment, o.function_body, o.arguments)
       end
 
       def visit_FunctionBodyNode(o)
@@ -514,7 +514,7 @@ module RKelly
               NAN
             end
           end
-        when RKelly::JS::Base
+        when JS::Base
           return to_number(to_primitive(value, 'Number'))
         end
       end
@@ -531,7 +531,7 @@ module RKelly
           value == 0 || nan?(value) ? false : true
         when ::String
           value.length == 0 ? false : true
-        when RKelly::JS::Base
+        when JS::Base
           true
         else
           raise
@@ -557,7 +557,7 @@ module RKelly
         case value
         when false, true, :undefined, ::String, Numeric
           value
-        when RKelly::JS::Base
+        when JS::Base
           call_function(value.default_value(preferred_type))
         end
       end
