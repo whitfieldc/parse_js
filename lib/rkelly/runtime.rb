@@ -26,7 +26,7 @@ module RKelly
     end
 
     def define_function(name, &block)
-      @env.record[name.to_s] = JS::Function.new(&block)
+      @env.record[name.to_s] = JS::Function.new(@env, &block)
     end
   end
 end

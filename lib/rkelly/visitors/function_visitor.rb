@@ -14,7 +14,7 @@ module RKelly
       end
 
       def visit_FunctionDeclNode(o)
-        @environment.record[o.value] = JS::Function.new(o.function_body, o.arguments, @environment)
+        @environment.record[o.value] = JS::Function.new(@environment, o.function_body, o.arguments)
       end
 
       def visit_FunctionExprNode(o)

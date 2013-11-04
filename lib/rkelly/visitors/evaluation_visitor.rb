@@ -441,7 +441,7 @@ module RKelly
       end
 
       def visit_FunctionExprNode(o)
-        RKelly::JS::Function.new(o.function_body, o.arguments, @environment)
+        RKelly::JS::Function.new(@environment, o.function_body, o.arguments)
       end
 
       def visit_FunctionBodyNode(o)

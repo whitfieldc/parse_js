@@ -32,7 +32,10 @@ module RKelly
 
       # Static factory method for the global environment.
       def self.new_global
-        Env::Lexical.new(nil, Env::ObjectRecord.new(JS::GlobalObject.new))
+        global_obj = JS::GlobalObject.new
+        env = Env::Lexical.new(nil, Env::ObjectRecord.new(global_obj))
+        global_obj.init_in_environment(env)
+        env
       end
 
       # Creates new Declarative Environment with reference to this env.
@@ -43,6 +46,11 @@ module RKelly
       # Creates new Object Environment with reference to this env.
       def new_object(obj)
         Env::Lexical.new(self, Env::ObjectRecord.new(obj))
+      end
+
+      # Access to the built-in Object.prototype
+      def object_prototype
+        @global_object.object_prototype
       end
 
       # Retrieves the variable value from this or one of the outer

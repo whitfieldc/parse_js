@@ -2,15 +2,15 @@ module RKelly
   module JS
     class Function < Base
       class << self
-        def create(*args)
+        def create(env, *args)
           if args.length > 0
             parser = RKelly::Parser.new
             body = args.pop
             tree = parser.parse("function x(#{args.join(',')}) { #{body} }")
             func = tree.value.first
-            self.new(func.function_body, func.arguments)
+            self.new(env, func.function_body, func.arguments)
           else
-            self.new
+            self.new(env)
           end
         end
       end
@@ -19,7 +19,7 @@ module RKelly
       #
       # For internal functions, a &block is given with Ruby code to execute.
       # For true JS functions, body and arguments are passed instead.
-      def initialize(body=nil, arguments = [], outer_environment=nil, &block)
+      def initialize(outer_environment, body=nil, arguments = [], &block)
         super()
         @body = body
         @block = block
@@ -29,6 +29,7 @@ module RKelly
 
         self['prototype'] = JS::Base.new
         self['prototype']['constructor'] = self
+        self['prototype'].prototype = @outer_environment.object_prototype
         self['length'] = @arguments.length
         self['arguments'] = nil
       end
@@ -40,7 +41,7 @@ module RKelly
         if has_property?('prototype')
           this.prototype = self['prototype']
         else
-          this.prototype = JS::ObjectPrototype.new
+          this.prototype = @outer_environment.object_prototype
         end
 
         res = call(this, *args)
