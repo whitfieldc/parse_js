@@ -1,3 +1,12 @@
+require 'rkelly/js/base'
+require 'rkelly/js/object_prototype'
+require 'rkelly/js/object'
+require 'rkelly/js/function'
+require 'rkelly/js/nan'
+require 'rkelly/js/number'
+require 'rkelly/js/string'
+require 'rkelly/js/math'
+
 module RKelly
   module JS
     class GlobalObject < Base
@@ -21,8 +30,7 @@ module RKelly
 
         self['undefined'] = :undefined
 
-        self['Object'] = JS::Function.new(env)
-        self['Object']['prototype'] = @object_prototype
+        self['Object'] = JS::Object.define(env)
 
         self['Function'] = JS::Function.define(env)
 
