@@ -107,4 +107,22 @@ class JsBaseTest < Test::Unit::TestCase
     assert_equal 7, @obj["own"]
   end
 
+  def test_enumerable_keys_returns_keys_in_object_itself
+    assert @obj.enumerable_keys.include?("foo")
+  end
+
+  def test_enumerable_keys_returns_keys_in_object_prototype
+    assert @obj.enumerable_keys.include?("bar")
+  end
+
+  def test_enumerable_keys_does_not_return_nonenumerable_keys
+    @obj.define_own_property("own", {:value => 7, :enumerable => false})
+    assert_equal false, @obj.enumerable_keys.include?("own")
+  end
+
+  def test_enumerable_keys_does_not_return_duplicate_keys
+    @obj["bar"] = 11
+    assert_equal 1, @obj.enumerable_keys.find_all {|k| k == "bar" }.length
+  end
+
 end

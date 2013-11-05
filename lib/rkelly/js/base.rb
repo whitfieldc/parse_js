@@ -81,6 +81,20 @@ module RKelly
         @properties.has_key?(name)
       end
 
+      # Returns names of all properties who's enumerable attribute is
+      # true (including the ones inherited through prototype chain).
+      def enumerable_keys
+        keys = @prototype ? @prototype.enumerable_keys : []
+
+        @properties.each_pair do |name, p|
+          next unless p.enumerable?
+          next if @prototype && @prototype.has_property?(name)
+          keys << name
+        end
+
+        keys
+      end
+
       def default_value(hint)
         case hint
         when 'Number'
