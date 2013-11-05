@@ -65,6 +65,18 @@ module RKelly
         @properties[name] = JS::Property.new(attributes)
       end
 
+      def get_own_property(name)
+        return :undefined unless has_own_property?(name)
+
+        p = @properties[name]
+        return {
+          :value => p.value,
+          :writable => p.writable?,
+          :configurable => p.configurable?,
+          :enumerable => p.enumerable?,
+        }
+      end
+
       def has_own_property?(name)
         @properties.has_key?(name)
       end

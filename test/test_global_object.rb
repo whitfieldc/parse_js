@@ -3,7 +3,8 @@ require File.dirname(__FILE__) + "/helper"
 class GlobalObjectTest < Test::Unit::TestCase
 
   def setup
-    @object = RKelly::JS::GlobalObject.new
+    env = RKelly::Env::Lexical.new_global
+    @object = env.global_object
   end
 
   def test_initialize

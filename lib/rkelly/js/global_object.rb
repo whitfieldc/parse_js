@@ -24,11 +24,9 @@ module RKelly
       def init_in_environment(env)
         @object_prototype = JS::ObjectPrototype.new(env)
 
-        self['NaN'] = JS::NaN.new
-
-        self['Infinity'] = 1.0/0.0
-
-        self['undefined'] = :undefined
+        define_frozen_property('NaN', JS::NaN.new)
+        define_frozen_property('Infinity', 1.0/0.0)
+        define_frozen_property('undefined', :undefined)
 
         self['Object'] = JS::Object.define(env)
 
@@ -39,6 +37,15 @@ module RKelly
         self['String'] = JS::String.new(env)
 
         self['Math'] = JS::Math.new
+      end
+
+      def define_frozen_property(name, value)
+        self.define_own_property(name, {
+            :value => value,
+            :writable => false,
+            :enumerable => false,
+            :configurable => false,
+          })
       end
     end
   end
