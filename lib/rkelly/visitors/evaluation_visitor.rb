@@ -1,6 +1,7 @@
 require 'rkelly/js/base'
 require 'rkelly/js/nan'
 require 'rkelly/js/function'
+require 'rkelly/js/error'
 require 'rkelly/runtime/completion'
 require 'rkelly/runtime/reference'
 
@@ -279,6 +280,16 @@ module RKelly
         relational_comparison(o) {|x, y| x >= y }
       end
 
+      def visit_InNode(o)
+        key = o.left.accept(self)
+        obj = o.value.accept(self)
+        if object?(obj)
+          obj.has_property?(key)
+        else
+          raise JS::TypeError
+        end
+      end
+
       ## 11.9 Equality Operators
 
       def visit_EqualNode(o)
@@ -476,7 +487,7 @@ module RKelly
         ElementNode
         ForInNode
         GetterPropertyNode
-        InNode InstanceOfNode LabelNode LeftShiftNode
+        InstanceOfNode LabelNode LeftShiftNode
         LogicalAndNode LogicalOrNode
         NotEqualNode NotStrictEqualNode
         OpURShiftEqualNode
@@ -626,6 +637,11 @@ module RKelly
       # Helper to check if x is +/-infinity.
       def infinite?(x)
         x.respond_to?(:infinite?) && x.infinite?
+      end
+
+      # Helper to check if x is object
+      def object?(x)
+        x.is_a?(JS::Base)
       end
 
     end

@@ -95,4 +95,35 @@ class Expressions_11_8_Relational_Test < ExecuteTestCase
     end
   end
 
+  def test_in_operator_with_missing_key
+    assert_execute({'x' => false}, <<-EOJS)
+      var obj = {alice: 7, bob: 8, claire: 9};
+      var x = 'john' in obj;
+    EOJS
+  end
+
+  def test_in_operator_with_existing_key
+    assert_execute({'x' => true}, <<-EOJS)
+      var obj = {alice: 7, bob: 8, claire: 9};
+      var x = 'bob' in obj;
+    EOJS
+  end
+
+  def test_in_operator_with_existing_key_in_prototype
+    assert_execute({'x' => true}, <<-EOJS)
+      var F = function() {};
+      F.prototype.foo = 8;
+      var obj = new F();
+      var x = 'foo' in obj;
+    EOJS
+  end
+
+  def test_in_operator_with_invalid_object
+    assert_raise RKelly::JS::TypeError do
+      @runtime.execute(<<-EOJS)
+        var x = 'foo' in 365;
+      EOJS
+    end
+  end
+
 end
