@@ -23,6 +23,14 @@ module RKelly
         when Nodes::ResolveNode
           @binder = environment
           @key = node.value
+        when Nodes::VarDeclNode
+          # Used to handle var declaration in for-in loop.  We grab
+          # the name of the var to treat it as ResolveNode, but
+          # additonally evaluate the node in case there's some
+          # initialization of the variable.
+          @binder = environment
+          node.accept(visitor)
+          @key = node.name
         else
           @value = node.accept(visitor)
           @binder = nil

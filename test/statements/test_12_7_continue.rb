@@ -45,6 +45,17 @@ class Statement_12_7_Continue_Test < ExecuteTestCase
     EOJS
   end
 
+  def test_continue_in_for_in_loop
+    assert_execute({ 'sum' => 4 }, <<-EOJS)
+      var obj = {a: 1, b: 2, c: 3};
+      var sum = 0;
+      for (var k in obj) {
+        if (k == 'b') continue;
+        sum += obj[k];
+      }
+    EOJS
+  end
+
   def test_continue_in_nested_loop
     assert_execute({ 'sum' => 10 }, <<-EOJS)
       var sum = 0;

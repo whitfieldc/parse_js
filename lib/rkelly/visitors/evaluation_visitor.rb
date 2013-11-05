@@ -444,6 +444,37 @@ module RKelly
         COMPLETION[:normal, final_value]
       end
 
+      def visit_ForInNode(o)
+        final_value = nil
+
+        ref = make_reference(o.left)
+
+        obj = o.right.accept(self)
+        if obj == nil || obj == :undefined
+          return COMPLETION[:normal]
+        end
+        # TODO: Call builtin toObject(obj)
+
+        obj.enumerable_keys.each do |key|
+          next unless obj.has_property?(key)
+          ref.value = key
+
+          c = o.value.accept(self)
+
+          final_value = c.value if c.value
+
+          if c.type == :continue
+            # do nothing
+          elsif c.type == :break
+            return COMPLETION[:normal, final_value]
+          elsif c.abrupt?
+            return c
+          end
+        end
+
+        COMPLETION[:normal, final_value]
+      end
+
       ## 12.8 The 'continue' Statement
       def visit_ContinueNode(o)
         COMPLETION[:continue]
@@ -485,7 +516,6 @@ module RKelly
         CaseBlockNode CaseClauseNode CommaNode ConditionalNode
         ConstStatementNode
         ElementNode
-        ForInNode
         GetterPropertyNode
         InstanceOfNode LabelNode LeftShiftNode
         LogicalAndNode LogicalOrNode
