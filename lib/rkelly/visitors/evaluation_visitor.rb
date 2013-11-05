@@ -295,9 +295,22 @@ module RKelly
         ref.value = o.value.accept(self)
       end
 
-      def visit_OpPlusEqualNode(o)
-        ref = make_reference(o.left)
-        ref.value += o.value.accept(self)
+      [
+        ["OpPlusEqualNode", :+],
+        ["OpMinusEqualNode", :-],
+        ["OpMultiplyEqualNode", :*],
+        ["OpDivideEqualNode", :/],
+        ["OpModEqualNode", :%],
+        ["OpAndEqualNode", :&],
+        ["OpOrEqualNode", :|],
+        ["OpXOrEqualNode", :^],
+        ["OpLShiftEqualNode", :<<],
+        ["OpRShiftEqualNode", :>>],
+      ].each do |name, operator|
+        define_method(:"visit_#{name}") do |o|
+          ref = make_reference(o.left)
+          ref.value = ref.value.send(operator, o.value.accept(self))
+        end
       end
 
 
@@ -466,10 +479,8 @@ module RKelly
         InNode InstanceOfNode LabelNode LeftShiftNode
         LogicalAndNode LogicalOrNode
         NotEqualNode NotStrictEqualNode
-        OpAndEqualNode OpDivideEqualNode
-        OpLShiftEqualNode OpMinusEqualNode OpModEqualNode
-        OpMultiplyEqualNode OpOrEqualNode OpRShiftEqualNode
-        OpURShiftEqualNode OpXOrEqualNode ParameterNode
+        OpURShiftEqualNode
+        ParameterNode
         RegexpNode RightShiftNode
         SetterPropertyNode StrictEqualNode
         SwitchNode ThrowNode TryNode
