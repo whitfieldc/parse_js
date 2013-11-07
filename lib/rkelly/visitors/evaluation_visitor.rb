@@ -490,6 +490,27 @@ module RKelly
         COMPLETION[:return, o.value ? o.value.accept(self) : :undefined]
       end
 
+      ## 12.11 The 'switch' Statement
+      def visit_SwitchNode(o)
+        final_value = nil
+
+        exp = o.left.accept(self)
+
+        # SwitchNode -> CaseBlockNode -> [CaseClauseNode]
+        o.value.value.each do |clause|
+          if clause.left.nil? || clause.left.accept(self) == exp
+            c = clause.value.accept(self)
+            if c.abrupt?
+              return c
+            else
+              final_value = c.value
+            end
+          end
+        end
+
+        COMPLETION[:normal, final_value]
+      end
+
 
       ## 13 Function Definition
 
@@ -513,7 +534,7 @@ module RKelly
       %w{
         ArrayNode BitAndNode BitOrNode
         BitXOrNode
-        CaseBlockNode CaseClauseNode CommaNode ConditionalNode
+        CommaNode ConditionalNode
         ConstStatementNode
         ElementNode
         GetterPropertyNode
@@ -524,7 +545,7 @@ module RKelly
         ParameterNode
         RegexpNode RightShiftNode
         SetterPropertyNode StrictEqualNode
-        SwitchNode ThrowNode TryNode
+        ThrowNode TryNode
         UnsignedRightShiftNode
         WithNode
       }.each do |type|
