@@ -493,12 +493,14 @@ module RKelly
       ## 12.11 The 'switch' Statement
       def visit_SwitchNode(o)
         final_value = nil
+        searching = true
 
         exp = o.left.accept(self)
 
         # SwitchNode -> CaseBlockNode -> [CaseClauseNode]
         o.value.value.each do |clause|
-          if clause.left.nil? || clause.left.accept(self) == exp
+          if !searching || clause.left.nil? || clause.left.accept(self) == exp
+            searching = false
             c = clause.value.accept(self)
             if c.abrupt?
               return c

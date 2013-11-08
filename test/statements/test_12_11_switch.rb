@@ -38,4 +38,37 @@ class Statement_12_11_Switch_Test < ExecuteTestCase
     EOJS
   end
 
+  def test_fall_through_first_case
+    assert_execute({ 'x' => 3 }, <<-EOJS)
+      var x = 0;
+      switch (1) {
+        case 1: x += 1;
+        case 2: x += 2; break;
+        default: x += 4;
+      }
+    EOJS
+  end
+
+  def test_fall_through_all_cases
+    assert_execute({ 'x' => 7 }, <<-EOJS)
+      var x = 0;
+      switch (1) {
+        case 1: x += 1;
+        case 2: x += 2;
+        default: x += 4;
+      }
+    EOJS
+  end
+
+  def test_fall_through_default_case_and_all_others
+    assert_execute({ 'x' => 7 }, <<-EOJS)
+      var x = 0;
+      switch (2) {
+        default: x += 1;
+        case 1: x += 2;
+        case 2: x += 4;
+      }
+    EOJS
+  end
+
 end
