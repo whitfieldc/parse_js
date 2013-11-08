@@ -490,6 +490,20 @@ module RKelly
         COMPLETION[:return, o.value ? o.value.accept(self) : :undefined]
       end
 
+      ## 12.10 The 'with' Statement
+      def visit_WithNode(o)
+        obj = o.left.accept(self)
+        # TODO: Call builtin toObject(obj)
+
+        @environment = @environment.new_object(obj)
+
+        c = o.value.accept(self)
+
+        @environment = @environment.outer
+
+        c
+      end
+
       ## 12.11 The 'switch' Statement
       def visit_SwitchNode(o)
         final_value = nil
@@ -549,7 +563,6 @@ module RKelly
         SetterPropertyNode StrictEqualNode
         ThrowNode TryNode
         UnsignedRightShiftNode
-        WithNode
       }.each do |type|
         define_method(:"visit_#{type}") do |o|
           raise "#{type} not defined"
