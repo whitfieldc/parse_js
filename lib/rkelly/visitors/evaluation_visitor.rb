@@ -410,7 +410,7 @@ module RKelly
 
           final_value = c.value if c.value
 
-          if c.type == :continue
+          if complete?(c, :continue, o)
             # do nothing
           elsif complete?(c, :break, o)
             return COMPLETION[:normal, final_value]
@@ -478,7 +478,7 @@ module RKelly
 
       ## 12.8 The 'continue' Statement
       def visit_ContinueNode(o)
-        COMPLETION[:continue]
+        COMPLETION[:continue, nil, o.value]
       end
 
       ## 12.8 The 'break' Statement
