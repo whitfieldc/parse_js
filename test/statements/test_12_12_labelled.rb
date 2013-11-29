@@ -172,4 +172,36 @@ class Statement_12_12_Labelled_Test < ExecuteTestCase
     EOJS
   end
 
+  # for in
+
+  def test_break_out_of_labelled_for_in_loop
+    assert_execute({ 'current' => 1 }, <<-EOJS)
+      var current = 0;
+      var obj = {a: 1, b: 2, c: 3};
+      first: for (var i in obj) {
+          if (obj[i] == 2) {
+              for (var j in obj) {
+                  break first;
+              }
+          }
+          current = obj[i];
+      }
+    EOJS
+  end
+
+  def test_break_continue_from_labelled_for_in_loop
+    assert_execute({ 'current' => 4 }, <<-EOJS)
+      var current = 0;
+      var obj = {a: 1, b: 2, c: 3};
+      first: for (var i in obj) {
+          if (obj[i] == 2) {
+              for (var j in obj) {
+                  continue first;
+              }
+          }
+          current += obj[i];
+      }
+    EOJS
+  end
+
 end
