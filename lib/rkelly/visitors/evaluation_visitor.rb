@@ -431,9 +431,9 @@ module RKelly
 
           final_value = c.value if c.value
 
-          if c.type == :continue
+          if complete?(c, :continue, o)
             # do nothing
-          elsif c.type == :break
+          elsif complete?(c, :break, o)
             return COMPLETION[:normal, final_value]
           elsif c.abrupt?
             return c

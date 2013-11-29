@@ -144,4 +144,32 @@ class Statement_12_12_Labelled_Test < ExecuteTestCase
     EOJS
   end
 
+  # for
+
+  def test_break_out_of_labelled_for_loop
+    assert_execute({ 'x' => 4 }, <<-EOJS)
+      first: for (var x=0; x<10; x++) {
+          if (x == 4) {
+              for (var i=0; i<1; i++) {
+                  break first;
+              }
+          }
+      }
+    EOJS
+  end
+
+  def test_break_continue_from_labelled_for_loop
+    assert_execute({ 'sum' => 4 }, <<-EOJS)
+      var sum = 0;
+      first: for (var x=1; x<4; x++) {
+          if (x == 2) {
+              for (var i=0; i<1; i++) {
+                  continue first;
+              }
+          }
+          sum += x;
+      }
+    EOJS
+  end
+
 end
