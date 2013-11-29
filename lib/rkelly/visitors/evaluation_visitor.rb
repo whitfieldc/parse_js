@@ -18,6 +18,7 @@ module RKelly
       def initialize(environment)
         super()
         @environment = environment
+        @labels = []
       end
 
       ## 11 Expressions
@@ -411,7 +412,7 @@ module RKelly
 
           if c.type == :continue
             # do nothing
-          elsif c.type == :break
+          elsif complete?(c, :break, o)
             return COMPLETION[:normal, final_value]
           elsif c.abrupt?
             return c
@@ -482,7 +483,7 @@ module RKelly
 
       ## 12.8 The 'break' Statement
       def visit_BreakNode(o)
-        COMPLETION[:break]
+        COMPLETION[:break, nil, o.value]
       end
 
       ## 12.9 The 'return' Statement
@@ -527,6 +528,13 @@ module RKelly
         COMPLETION[:normal, final_value]
       end
 
+      ## 12.12 Labelled Statements
+      def visit_LabelNode(o)
+        with_label(o) do
+          o.value.accept(self)
+        end
+      end
+
 
       ## 13 Function Definition
 
@@ -554,7 +562,7 @@ module RKelly
         ConstStatementNode
         ElementNode
         GetterPropertyNode
-        InstanceOfNode LabelNode LeftShiftNode
+        InstanceOfNode LeftShiftNode
         LogicalAndNode LogicalOrNode
         NotEqualNode NotStrictEqualNode
         OpURShiftEqualNode
@@ -708,6 +716,37 @@ module RKelly
       # Helper to check if x is object
       def object?(x)
         x.is_a?(JS::Base)
+      end
+
+      # Label handling:
+
+      # Used in visit_LabelNode to remember the current label.
+      def with_label(label_node, &block)
+        @labels << label_node
+        v = yield
+        @labels.pop
+        return v
+      end
+
+      # Returns the name of the current label.
+      def current_label_name
+        @labels.last.name
+      end
+
+      # Returns the statement associated with current label.
+      def current_label_statement
+        @labels.last.value
+      end
+
+      # Helper to check if completion is of specific type and it has
+      # no target, or its target matches with the label of current
+      # statement.
+      def complete?(completion, type, statement)
+        completion.type == type && (!completion.target || label_matches?(completion.target, statement))
+      end
+
+      def label_matches?(name, statement)
+        statement == current_label_statement && name == current_label_name
       end
 
     end
