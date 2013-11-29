@@ -112,4 +112,36 @@ class Statement_12_12_Labelled_Test < ExecuteTestCase
     EOJS
   end
 
+  # do while
+
+  def test_break_out_of_labelled_do_while_loop
+    assert_execute({ 'x' => 4 }, <<-EOJS)
+      var x = 0;
+      first: do {
+          if (x == 4) {
+              do {
+                  break first;
+              } while (false);
+          }
+          x++;
+      } while (x < 10);
+    EOJS
+  end
+
+  def test_break_continue_from_labelled_do_while_loop
+    assert_execute({ 'sum' => 4 }, <<-EOJS)
+      var sum = 0;
+      var i = 0
+      first: do {
+          i++;
+          if (i == 2) {
+              do {
+                  continue first;
+              } while (false);
+          }
+          sum += i;
+      } while (i < 3);
+    EOJS
+  end
+
 end
