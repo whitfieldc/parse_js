@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'rkelly/lexeme'
 require 'rkelly/char_range'
 require 'strscan'
@@ -69,7 +70,7 @@ module RKelly
     }
 
     # Determine the method to use to measure String length in bytes,
-    # because StringScanner#pos can obly be set in bytes.
+    # because StringScanner#pos can only be set in bytes.
     #
     # - In Ruby 1.8 String#length returns always the string length
     #   in bytes.
@@ -79,12 +80,50 @@ module RKelly
     #
     BYTESIZE_METHOD = "".respond_to?(:bytesize) ? :bytesize : :length
 
+    # JavaScript whitespace can consist of any Unicode space separator
+    # characters.
+    #
+    # - In Ruby 1.9+ we can just use the [[:space:]] character class
+    #   and match them all.
+    #
+    # - In Ruby 1.8 we need a regex that identifies the specific bytes
+    #   in UTF-8 text.
+    #
+    WHITESPACE_REGEX = "".respond_to?(:encoding) ? /[[:space:]]+/m : %r{
+      (
+        \xC2\xA0     |   # no-break space
+        \xE1\x9A\x80 |   # ogham space mark
+        \xE2\x80\x80 |   # en quad
+        \xE2\x80\x81 |   # em quad
+        \xE2\x80\x82 |   # en space
+        \xE2\x80\x83 |   # em space
+        \xE2\x80\x84 |   # three-per-em space
+        \xE2\x80\x85 |   # four-pre-em süace
+        \xE2\x80\x86 |   # six-per-em space
+        \xE2\x80\x87 |   # figure space
+        \xE2\x80\x88 |   # punctuation space
+        \xE2\x80\x89 |   # thin space
+        \xE2\x80\x8A |   # hair space
+        \xE2\x80\xA8 |   # line separator
+        \xE2\x80\xA9 |   # paragraph separator
+        \xE2\x80\xAF |   # narrow no-break space
+        \xE2\x81\x9F |   # medium mathematical space
+        \xE3\x80\x80     # ideographic space
+      )+
+    }mx
+
     def initialize(&block)
       @lexemes = Hash.new {|hash, key| hash[key] = [] }
 
       token(:COMMENT, /\/(?:\*(?:.)*?\*\/|\/[^\n]*)/m, ['/'])
       token(:STRING, /"(?:[^"\\]*(?:\\.[^"\\]*)*)"|'(?:[^'\\]*(?:\\.[^'\\]*)*)'/m, ["'", '"'])
-      token(:S, /\s*/m, [" ", "\t", "\r", "\n", "\f"])
+
+      # Matcher for basic ASCII whitespace.
+      # (Unicode whitespace is handled separately in #match_lexeme)
+      #
+      # Can't use just "\s" in regex, because in Ruby 1.8 this
+      # doesn't include the vertical tab "\v" character
+      token(:S, /[ \t\r\n\f\v]*/m, [" ", "\t", "\r", "\n", "\f", "\v"])
 
       # A regexp to match floating point literals (but not integer literals).
       digits = ('0'..'9').to_a
@@ -179,6 +218,13 @@ module RKelly
 
         token = lexeme.match(scanner)
         return token if token
+      end
+
+      # When some other character encountered, try to match it as
+      # whitespace, as in JavaScript whitespace can contain any
+      # Unicode whitespace character.
+      if str = scanner.check(WHITESPACE_REGEX)
+        return Token.new(:S, str)
       end
     end
 
