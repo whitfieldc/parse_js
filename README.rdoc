@@ -1,29 +1,29 @@
-= RKelly Remix
+= ParseJS
 
-https://github.com/nene/rkelly-remix
+https://github.com/whitfieldc/parse_js
 
 == DESCRIPTION
 
-RKelly Remix is a fork of the
-RKelly[https://github.com/tenderlove/rkelly] JavaScript parser.
+ParseJS is a fork of the
+RKelly Remix[https://github.com/nene/rkelly-remix] JavaScript parser.
+Currently the only difference is that the previous project's undesirable name has been changed to ParseJS.
+The previous project's original README is below, with library naming changed as appropriate.
 
 == Install
 
-  gem install rkelly-remix
+  gem install parse_js
 
-Note that you can't have rkelly and rkelly-remix both installed at the
-same time.  That would cause a conflict since they're both included
-with:
+Include with:
 
-  require 'rkelly'
+  require 'parse_js'
 
 == Example
 
   # Iterate over and modify a JavaScript AST.  Then print the modified
   # AST as JavaScript.
-  require 'rkelly'
+  require 'parse_js'
 
-  parser = RKelly::Parser.new
+  parser = ParseJS::Parser.new
   ast    = parser.parse(
     "for(var i = 0; i < 10; i++) { var x = 5 + 5; }"
   )
@@ -36,14 +36,9 @@ with:
 
 == Why fork?
 
-Currently the original RKelly project is unmaintained.  The latest
+Currently the original project is unmaintained.  The latest
 release was in late 2012, and since then the author has not responded
 to bug reports or pull requests.
-
-I created this fork mainly to satisfy the needs of my
-JSDuck[https://github.com/senchalabs/jsduck] project, but you too
-should consider using it, as it fixes several problems in the original
-RKelly:
 
 === Much improved speed
 
@@ -52,13 +47,13 @@ RKelly:
 
 === Correct start/end position data for all syntax nodes
 
-Original RKelly only had a rudimentary support for getting the line
+Original project only had a rudimentary support for getting the line
 number of an AST node, and even that was often wrong.
 
-In RKelly Remix each AST node has a range property, which contains
+In ParseJS each AST node has a range property, which contains
 granular data about the exact location of the node in source code:
 
-  parser = RKelly::Parser.new
+  parser = ParseJS::Parser.new
   ast = parser.parse(<<-eojs)
     function aaron() {
       var x = 10;
@@ -80,14 +75,14 @@ granular data about the exact location of the node in source code:
 
 === Sensible comments handling
 
-Original RKelly attempted to associate each comment with a related AST
+Original project attempted to associate each comment with a related AST
 node, but failed to correctly do so, which is understandable, as there
-is no standard way to do such a mapping.  RKelly Remix abandons this
+is no standard way to do such a mapping.  ParseJS abandons this
 and just lists all commenst in the root node, leaving the user with
 the task of associating them with AST nodes if he desires so (the same
 approach is taken by another JS parser: Esprima[http://esprima.org] ).
 
-  parser = RKelly::Parser.new
+  parser = ParseJS::Parser.new
   ast = parser.parse(<<-eojs)
     /**
      * This is an awesome test comment.
