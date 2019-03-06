@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/helper"
 
-class RKellyTest < Test::Unit::TestCase
+class ParseJSTest < Test::Unit::TestCase
   def test_array_access
     assert_sexp(
       [
@@ -10,7 +10,7 @@ class RKellyTest < Test::Unit::TestCase
           ]]
         ]
       ],
-      RKelly.parse('var a = foo[10];'))
+      ParseJS.parse('var a = foo[10];'))
   end
 
   def assert_sexp(expected, node)

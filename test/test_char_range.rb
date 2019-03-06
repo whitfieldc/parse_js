@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + "/helper"
 
 class CharRangeTest < NodeTestCase
   def test_advancing_empty_range
-    a = RKelly::CharRange::EMPTY
+    a = ParseJS::CharRange::EMPTY
     b = a.next("foo")
 
     assert_equal(1, b.from.line)
@@ -15,7 +15,7 @@ class CharRangeTest < NodeTestCase
   end
 
   def test_advancing_with_multiline_string
-    a = RKelly::CharRange.new(RKelly::CharPos.new(1,1,0), RKelly::CharPos.new(1,1,0))
+    a = ParseJS::CharRange.new(ParseJS::CharPos.new(1,1,0), ParseJS::CharPos.new(1,1,0))
     b = a.next("foo\nblah")
 
     assert_equal(1, b.from.line)

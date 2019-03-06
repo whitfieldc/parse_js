@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + "/helper"
 
 class LineNumberTest < NodeTestCase
   def test_line_numbers
-    parser = RKelly::Parser.new
+    parser = ParseJS::Parser.new
     ast = parser.parse(<<-eojs)
       /**
        * This is an awesome test comment.
@@ -22,7 +22,7 @@ class LineNumberTest < NodeTestCase
   end
 
   def test_ranges
-    parser = RKelly::Parser.new
+    parser = ParseJS::Parser.new
     ast = parser.parse(<<-eojs)
       /**
        * This is an awesome test comment.
@@ -42,7 +42,7 @@ class LineNumberTest < NodeTestCase
   end
 
   def test_range_of_var_statement_with_semicolon
-    parser = RKelly::Parser.new
+    parser = ParseJS::Parser.new
     ast = parser.parse(<<-eojs)
       var x = {
         foo: 10,
@@ -54,7 +54,7 @@ class LineNumberTest < NodeTestCase
   end
 
   def test_range_of_var_statement_without_semicolon
-    parser = RKelly::Parser.new
+    parser = ParseJS::Parser.new
     ast = parser.parse(<<-eojs)
       var x = {
         foo: 10,
@@ -66,7 +66,7 @@ class LineNumberTest < NodeTestCase
   end
 
   def test_range_of_empty_function_body
-    parser = RKelly::Parser.new
+    parser = ParseJS::Parser.new
     ast = parser.parse(<<-eojs)
       function f () {
       }
