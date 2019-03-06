@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'rkelly'
+require 'parse_js'
 require 'test/ecma_script_test_case'
 require 'test/execute_test_case'
 require 'test/node_test_case'

@@ -4,11 +4,12 @@ require 'hoe'
 Hoe.plugin :gemspec # `gem install hoe-gemspec`
 Hoe.plugin :git     # `gem install hoe-git`
 
-GENERATED_PARSER = "lib/rkelly/generated_parser.rb"
+GENERATED_PARSER = "lib/parse_js/generated_parser.rb"
 
-HOE = Hoe.spec('rkelly-remix') do |p|
+HOE = Hoe.spec('parse_js') do |p|
   developer('Aaron Patterson', 'aaron.patterson@gmail.com')
   developer('Rene Saarsoo', 'rene.saarsoo@sencha.com')
+  developer('Charles Whitfield', 'whitfield.cw@gmail.com')
   self.readme_file   = 'README.rdoc'
   self.history_file  = 'CHANGELOG.rdoc'
   self.extra_rdoc_files  = FileList['*.rdoc']

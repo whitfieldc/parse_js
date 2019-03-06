@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + "/helper"
 
 class CharPosTest < NodeTestCase
   def test_advancing_empty_position
-    a = RKelly::CharPos::EMPTY
+    a = ParseJS::CharPos::EMPTY
     b = a.next("foo")
 
     assert_equal(1, b.line)
@@ -11,7 +11,7 @@ class CharPosTest < NodeTestCase
   end
 
   def test_advancing_with_single_line_string
-    a = RKelly::CharPos.new(3,5,22)
+    a = ParseJS::CharPos.new(3,5,22)
     b = a.next("foo bar")
 
     assert_equal(3, b.line)
@@ -20,7 +20,7 @@ class CharPosTest < NodeTestCase
   end
 
   def test_advancing_with_multi_line_string
-    a = RKelly::CharPos.new(3,5,22)
+    a = ParseJS::CharPos.new(3,5,22)
     b = a.next("\nfoo\nbar\nbaz")
 
     assert_equal(6, b.line)
@@ -29,7 +29,7 @@ class CharPosTest < NodeTestCase
   end
 
   def test_advancing_with_multi_line_string_ending_with_newline
-    a = RKelly::CharPos.new(3,5,22)
+    a = ParseJS::CharPos.new(3,5,22)
     b = a.next("\nfoo\nbar\n")
 
     assert_equal(6, b.line)

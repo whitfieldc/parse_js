@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + "/helper"
 
 class RuntimeTest < Test::Unit::TestCase
   def setup
-    @runtime = RKelly::Runtime.new
+    @runtime = ParseJS::Runtime.new
   end
 
   def test_call_function

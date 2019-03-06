@@ -1,6 +1,6 @@
 /* vim: set filetype=racc : */
 
-class RKelly::GeneratedParser
+class ParseJS::GeneratedParser
 
 /* Literals */
 token NULL TRUE FALSE
@@ -603,7 +603,7 @@ rule
   | ExprNoBF error {
       result = ExpressionStatementNode.new(val.first)
       debug(result)
-      raise RKelly::SyntaxError unless allow_auto_semi?(val.last)
+      raise ParseJS::SyntaxError unless allow_auto_semi?(val.last)
     }
   ;
 
@@ -860,10 +860,10 @@ rule
 end
 
 ---- header
-  require "rkelly/nodes"
+  require "parse_js/nodes"
 
 ---- inner
-  include RKelly::Nodes
+  include ParseJS::Nodes
 
   def allow_auto_semi?(error_token)
     error_token == false || error_token == '}' || @terminator
