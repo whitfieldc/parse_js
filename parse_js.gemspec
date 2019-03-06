@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-# stub: parse_js 0.0.1.20190306131749 ruby lib
+# stub: parse_js 0.0.7.20190306131749 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "parse_js"
-  s.version = "0.0.1.20190306131749"
+  s.version = "0.0.7.20190306131749"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
